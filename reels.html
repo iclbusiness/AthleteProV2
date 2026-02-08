@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Reels - AthletePro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="reels">
+  <!-- Minimal Header for Reels -->
+  <header class="reels-header">
+    <a href="index.html" class="reels-logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      AthletePro
+    </a>
+    <div class="reels-nav">
+      <a href="feed.html" class="reels-nav-link">Feed</a>
+      <a href="gameday.html" class="reels-nav-link">Game Day</a>
+      <div id="navUserDisplay" class="auth-logged-in"></div>
+      <a href="login.html" class="btn btn-primary btn-sm auth-logged-out">Log In</a>
+    </div>
+  </header>
+
+  <!-- Reels Container -->
+  <main class="reels-page">
+    <div class="reels-container" id="reelsContainer">
+      <!-- Reels will be rendered here -->
+    </div>
+
+    <!-- Navigation hints -->
+    <div class="reels-nav-hints">
+      <button class="reel-nav-btn" onclick="navigateReel(-1)">
+        <span>&#9650;</span>
+      </button>
+      <button class="reel-nav-btn" onclick="navigateReel(1)">
+        <span>&#9660;</span>
+      </button>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

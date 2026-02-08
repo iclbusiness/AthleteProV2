@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - AthletePro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="dashboard">
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">AthletePro</span>
+            <span class="logo-tagline">Recruit • Connect • Succeed</span>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="reels.html" class="nav-link">Reels</a>
+          <a href="feed.html" class="nav-link">Feed</a>
+          <a href="gameday.html" class="nav-link">Game Day</a>
+          <a href="index.html" class="nav-link">Athletes</a>
+          <a href="training.html" class="nav-link">Training</a>
+          <div id="navUserDisplay" class="auth-logged-in"></div>
+          <a href="login.html" class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
+          <a href="signup.html" class="btn btn-primary auth-logged-out">Sign Up</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Dashboard Content -->
+  <main class="dashboard-page">
+    <div class="container">
+      <!-- Account Info -->
+      <div class="dashboard-header" id="accountInfo">
+        <h1>Welcome!</h1>
+      </div>
+
+      <!-- Profiles Section -->
+      <section class="dashboard-section">
+        <div class="section-header">
+          <h2>My Profiles</h2>
+          <a href="create.html" class="btn btn-primary">+ New Profile</a>
+        </div>
+
+        <div class="profiles-grid" id="profilesGrid">
+          <!-- Profiles will be rendered here -->
+        </div>
+      </section>
+
+      <!-- Upcoming Events Calendar -->
+      <section class="dashboard-section calendar-section">
+        <div class="section-header">
+          <h2>Upcoming Events</h2>
+          <p>Your schedule and activities</p>
+        </div>
+        <div class="calendar-container compact">
+          <div class="calendar-header">
+            <button class="btn btn-sm btn-secondary" onclick="changeCalendarMonth(-1)">&larr;</button>
+            <h3 id="calendarMonthYear"></h3>
+            <button class="btn btn-sm btn-secondary" onclick="changeCalendarMonth(1)">&rarr;</button>
+          </div>
+          <div class="calendar-grid" id="calendarGrid">
+            <!-- Calendar will be rendered by JavaScript -->
+          </div>
+        </div>
+        <div class="upcoming-events-list" id="upcomingEventsList">
+          <!-- Upcoming events list will be rendered by JavaScript -->
+        </div>
+      </section>
+
+      <!-- Quick Actions -->
+      <section class="dashboard-section">
+        <h2>Quick Actions</h2>
+        <div class="quick-actions-grid">
+          <a href="reels.html" class="quick-action-card">
+            <span class="quick-action-icon">&#127909;</span>
+            <h3>Browse Reels</h3>
+            <p>Watch athlete highlights</p>
+          </a>
+          <a href="feed.html" class="quick-action-card">
+            <span class="quick-action-icon">&#128240;</span>
+            <h3>View Feed</h3>
+            <p>See latest posts</p>
+          </a>
+          <a href="index.html" class="quick-action-card">
+            <span class="quick-action-icon">&#128269;</span>
+            <h3>Discover Athletes</h3>
+            <p>Find and follow athletes</p>
+          </a>
+          <a href="training.html" class="quick-action-card">
+            <span class="quick-action-icon">&#127947;</span>
+            <h3>Training Plans</h3>
+            <p>Browse workout programs</p>
+          </a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> AthletePro
+        </div>
+        <div class="footer-links">
+          <a href="index.html" class="footer-link">Home</a>
+          <a href="reels.html" class="footer-link">Reels</a>
+          <a href="dashboard.html" class="footer-link">Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

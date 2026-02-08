@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Profile - AthletePro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="create">
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">AthletePro</span>
+            <span class="logo-tagline">Recruit • Connect • Succeed</span>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="reels.html" class="nav-link">Reels</a>
+          <a href="feed.html" class="nav-link">Feed</a>
+          <a href="gameday.html" class="nav-link">Game Day</a>
+          <a href="index.html" class="nav-link">Athletes</a>
+          <div id="navUserDisplay" class="auth-logged-in"></div>
+          <a href="login.html" class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
+          <a href="signup.html" class="btn btn-primary auth-logged-out">Sign Up</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Create Profile Form -->
+  <main class="create-page">
+    <div class="container">
+      <div class="form-container">
+        <!-- Form Header -->
+        <div class="form-header">
+          <h1>Create Your Profile</h1>
+          <p>Showcase your talent to recruiters and coaches</p>
+        </div>
+
+        <!-- Step Indicators -->
+        <div class="form-steps">
+          <div class="step active" data-step="1">
+            <span class="step-number">1</span>
+            <span class="step-label">Basic Info</span>
+          </div>
+          <div class="step" data-step="2">
+            <span class="step-number">2</span>
+            <span class="step-label">Details</span>
+          </div>
+          <div class="step" data-step="3">
+            <span class="step-number">3</span>
+            <span class="step-label">Videos</span>
+          </div>
+          <div class="step" data-step="4">
+            <span class="step-number">4</span>
+            <span class="step-label">Stats & Preview</span>
+          </div>
+        </div>
+
+        <!-- Form Body -->
+        <div class="form-body">
+          <!-- Step 1: Basic Info -->
+          <div class="form-section active" data-section="1">
+            <h2>Basic Information</h2>
+
+            <div class="form-group">
+              <label for="athleteName">Full Name <span>*</span></label>
+              <input type="text" id="athleteName" class="form-control" placeholder="Enter your full name" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sport">Sport <span>*</span></label>
+                <select id="sport" class="form-control" required>
+                  <option value="">Select Sport</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="position">Position</label>
+                <select id="position" class="form-control">
+                  <option value="">Select Position</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="gradYear">Graduation Year <span>*</span></label>
+              <select id="gradYear" class="form-control" required>
+                <option value="">Select Year</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Profile Photo</label>
+              <div class="photo-upload">
+                <div class="photo-preview" id="photoPreview">
+                  <span class="photo-preview-placeholder">📷</span>
+                </div>
+                <div>
+                  <input type="file" id="photoInput" accept="image/*" class="hidden">
+                  <button type="button" class="btn btn-secondary" onclick="document.getElementById('photoInput').click()">
+                    Upload Photo
+                  </button>
+                  <p class="mt-1" style="font-size: 0.875rem; color: var(--text-secondary);">
+                    JPG, PNG or GIF. Max 5MB.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Physical Stats & Contact -->
+          <div class="form-section" data-section="2">
+            <h2>Physical Stats & Contact</h2>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Height</label>
+                <div style="display: flex; gap: 0.5rem;">
+                  <select id="heightFeet" class="form-control">
+                    <option value="">Ft</option>
+                    <option value="4">4'</option>
+                    <option value="5">5'</option>
+                    <option value="6">6'</option>
+                    <option value="7">7'</option>
+                  </select>
+                  <select id="heightInches" class="form-control">
+                    <option value="">In</option>
+                    <option value="0">0"</option>
+                    <option value="1">1"</option>
+                    <option value="2">2"</option>
+                    <option value="3">3"</option>
+                    <option value="4">4"</option>
+                    <option value="5">5"</option>
+                    <option value="6">6"</option>
+                    <option value="7">7"</option>
+                    <option value="8">8"</option>
+                    <option value="9">9"</option>
+                    <option value="10">10"</option>
+                    <option value="11">11"</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="weight">Weight (lbs)</label>
+                <input type="number" id="weight" class="form-control" placeholder="e.g., 175">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="city">City</label>
+                <input type="text" id="city" class="form-control" placeholder="e.g., Los Angeles">
+              </div>
+              <div class="form-group">
+                <label for="state">State</label>
+                <input type="text" id="state" class="form-control" placeholder="e.g., CA">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" class="form-control" placeholder="your@email.com">
+              </div>
+              <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" class="form-control" placeholder="(555) 123-4567">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="bio">Bio</label>
+              <textarea id="bio" class="form-control" placeholder="Tell recruiters about yourself, your achievements, goals, and what makes you stand out..."></textarea>
+            </div>
+          </div>
+
+          <!-- Step 3: Highlight Videos -->
+          <div class="form-section" data-section="3">
+            <h2>Highlight Videos</h2>
+            <p class="mb-2" style="color: var(--text-secondary);">
+              Add video links from YouTube, Vimeo, VEO, or Hudl to showcase your best moments.
+            </p>
+
+            <div id="videosList" class="items-list">
+              <p class="text-secondary">No videos added yet</p>
+            </div>
+
+            <button type="button" id="addVideoBtn" class="btn btn-secondary">
+              + Add Video
+            </button>
+
+            <div id="videoForm" class="add-item-form hidden">
+              <h4>Add Highlight Video</h4>
+
+              <div class="form-group">
+                <label for="videoUrl">Video URL <span>*</span></label>
+                <input type="url" id="videoUrl" class="form-control" placeholder="YouTube, Vimeo, VEO, or Hudl URL...">
+              </div>
+
+              <div class="form-group">
+                <label for="videoTitle">Title</label>
+                <input type="text" id="videoTitle" class="form-control" placeholder="e.g., Season Highlights 2024">
+              </div>
+
+              <div class="form-group">
+                <label for="videoDescription">Description</label>
+                <textarea id="videoDescription" class="form-control" style="min-height: 80px;" placeholder="Brief description of the video..."></textarea>
+              </div>
+
+              <div style="display: flex; gap: 0.5rem;">
+                <button type="button" id="saveVideoBtn" class="btn btn-primary">Save Video</button>
+                <button type="button" id="cancelVideoBtn" class="btn btn-secondary">Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4: Performance Stats & Preview -->
+          <div class="form-section" data-section="4">
+            <h2>Performance Stats</h2>
+            <p class="mb-2" style="color: var(--text-secondary);">
+              Add your key performance statistics.
+            </p>
+
+            <div id="statsFields" class="form-row">
+              <p class="text-secondary">Select a sport to see stat fields</p>
+            </div>
+
+            <h2 class="mt-4">Profile Preview</h2>
+            <div id="profilePreview">
+              <!-- Preview will be rendered here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Navigation -->
+        <div class="form-nav">
+          <button type="button" id="prevBtn" class="btn btn-secondary" style="visibility: hidden;">
+            ← Previous
+          </button>
+          <button type="button" id="nextBtn" class="btn btn-primary">
+            Next →
+          </button>
+          <button type="button" id="saveBtn" class="btn btn-primary hidden">
+            Save Profile
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> AthletePro
+        </div>
+        <div class="footer-links">
+          <a href="index.html" class="footer-link">Home</a>
+          <a href="feed.html" class="footer-link">Feed</a>
+          <a href="create.html" class="footer-link">Create Profile</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

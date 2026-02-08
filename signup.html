@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - AthletePro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="signup">
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">AthletePro</span>
+            <span class="logo-tagline">Recruit • Connect • Succeed</span>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="reels.html" class="nav-link">Reels</a>
+          <a href="feed.html" class="nav-link">Feed</a>
+          <a href="gameday.html" class="nav-link">Game Day</a>
+          <a href="index.html" class="nav-link">Athletes</a>
+          <a href="login.html" class="btn btn-secondary">Log In</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Signup Form -->
+  <main class="auth-page">
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h1>Join AthletePro</h1>
+          <p>Create your account and start your journey</p>
+        </div>
+
+        <form id="signupForm" class="auth-form">
+          <!-- Account Type Selection -->
+          <div class="form-group">
+            <label>I am a...</label>
+            <div class="account-type-selector">
+              <label class="account-type-option">
+                <input type="radio" name="accountType" value="athlete" checked>
+                <div class="account-type-card">
+                  <span class="account-type-icon">🏃</span>
+                  <span class="account-type-label">Athlete</span>
+                  <span class="account-type-desc">Showcase your talent</span>
+                </div>
+              </label>
+              <label class="account-type-option">
+                <input type="radio" name="accountType" value="scout">
+                <div class="account-type-card">
+                  <span class="account-type-icon">🔍</span>
+                  <span class="account-type-label">Scout</span>
+                  <span class="account-type-desc">Discover talent</span>
+                </div>
+              </label>
+              <label class="account-type-option">
+                <input type="radio" name="accountType" value="coach">
+                <div class="account-type-card">
+                  <span class="account-type-icon">📋</span>
+                  <span class="account-type-label">Coach</span>
+                  <span class="account-type-desc">Build your team</span>
+                </div>
+              </label>
+              <label class="account-type-option">
+                <input type="radio" name="accountType" value="parent">
+                <div class="account-type-card">
+                  <span class="account-type-icon">👨‍👩‍👧</span>
+                  <span class="account-type-label">Parent</span>
+                  <span class="account-type-desc">Support your athlete</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="signupName">Full Name</label>
+            <input type="text" id="signupName" class="form-control" placeholder="Enter your name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="signupEmail">Email</label>
+            <input type="email" id="signupEmail" class="form-control" placeholder="your@email.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="signupPassword">Password</label>
+            <input type="password" id="signupPassword" class="form-control" placeholder="At least 6 characters" required minlength="6">
+          </div>
+
+          <div class="form-group">
+            <label for="signupConfirmPassword">Confirm Password</label>
+            <input type="password" id="signupConfirmPassword" class="form-control" placeholder="Confirm your password" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg btn-block">Create Account</button>
+        </form>
+
+        <div class="auth-footer">
+          <p>Already have an account? <a href="login.html">Log in</a></p>
+        </div>
+      </div>
+
+      <div class="auth-features">
+        <h3>One Account, Multiple Profiles</h3>
+        <p>Create profiles for all your sports:</p>
+        <div class="sport-icons">
+          <span title="Soccer">&#9917;</span>
+          <span title="Basketball">&#127936;</span>
+          <span title="Football">&#127944;</span>
+          <span title="Baseball">&#9918;</span>
+          <span title="Volleyball">&#127952;</span>
+          <span title="Track">&#127939;</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

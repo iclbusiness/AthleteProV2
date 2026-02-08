@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Athlete Profile - AthletePro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="profile">
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">AthletePro</span>
+            <span class="logo-tagline">Recruit • Connect • Succeed</span>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="reels.html" class="nav-link">Reels</a>
+          <a href="feed.html" class="nav-link">Feed</a>
+          <a href="gameday.html" class="nav-link">Game Day</a>
+          <a href="index.html" class="nav-link">Athletes</a>
+          <div id="navUserDisplay" class="auth-logged-in"></div>
+          <a href="login.html" class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
+          <a href="signup.html" class="btn btn-primary auth-logged-out">Sign Up</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Profile Hero -->
+  <section class="profile-hero">
+    <div class="container" id="profileHero">
+      <!-- Profile header content will be rendered by JavaScript -->
+      <div class="profile-header">
+        <div class="profile-photo-placeholder">👤</div>
+        <div class="profile-info">
+          <h1>Loading...</h1>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Profile Content -->
+  <section class="profile-content">
+    <div class="container">
+      <div class="profile-grid">
+        <!-- Main Content -->
+        <div class="profile-main">
+          <!-- Bio Section -->
+          <div class="profile-section" id="bioSection">
+            <h2>About</h2>
+            <p>Loading...</p>
+          </div>
+
+          <!-- Videos Section -->
+          <div class="profile-section" id="videosSection">
+            <h2>Highlight Videos</h2>
+            <div class="videos-grid">
+              <!-- Videos will be rendered by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Stats Section -->
+          <div class="profile-section" id="statsSection">
+            <h2>Performance Stats</h2>
+            <div class="stats-grid">
+              <!-- Stats will be rendered by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Posts Section -->
+          <div class="profile-section" id="postsSection">
+            <h2>Posts</h2>
+            <div class="profile-posts">
+              <!-- Posts will be rendered by JavaScript -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="profile-sidebar">
+          <!-- Contact Section -->
+          <div class="profile-section" id="contactSection">
+            <h2>Contact</h2>
+            <div class="contact-list">
+              <!-- Contact info will be rendered by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> AthletePro
+        </div>
+        <div class="footer-links">
+          <a href="index.html" class="footer-link">Home</a>
+          <a href="feed.html" class="footer-link">Feed</a>
+          <a href="create.html" class="footer-link">Create Profile</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scout Dashboard - AthletePro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="scout-dashboard">
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">AthletePro</span>
+            <span class="logo-tagline">Recruit • Connect • Succeed</span>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="reels.html" class="nav-link">Reels</a>
+          <a href="feed.html" class="nav-link">Feed</a>
+          <a href="gameday.html" class="nav-link">Game Day</a>
+          <a href="index.html" class="nav-link">Athletes</a>
+          <a href="training.html" class="nav-link">Training</a>
+          <div id="navUserDisplay" class="auth-logged-in"></div>
+          <a href="login.html" class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
+          <a href="signup.html" class="btn btn-primary auth-logged-out">Sign Up</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Dashboard Hero -->
+  <section class="dashboard-hero">
+    <div class="container">
+      <div class="dashboard-hero-content">
+        <h1>Scout Dashboard</h1>
+        <p>Discover, track, and connect with talented athletes</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dashboard Stats -->
+  <section class="dashboard-stats-section">
+    <div class="container">
+      <div id="dashboardStats" class="dashboard-stats-grid">
+        <!-- Stats will be rendered by JavaScript -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Calendar Section -->
+  <section class="dashboard-section calendar-section">
+    <div class="container">
+      <div class="section-header-with-action">
+        <div>
+          <h2>Upcoming Events</h2>
+          <p>Your schedule and upcoming activities</p>
+        </div>
+        <button class="btn btn-primary" onclick="showCreateEventModal()">+ Add Event</button>
+      </div>
+      <div class="calendar-container">
+        <div class="calendar-header">
+          <button class="btn btn-sm btn-secondary" onclick="changeCalendarMonth(-1)">&larr; Prev</button>
+          <h3 id="calendarMonthYear"></h3>
+          <button class="btn btn-sm btn-secondary" onclick="changeCalendarMonth(1)">Next &rarr;</button>
+        </div>
+        <div class="calendar-grid" id="calendarGrid">
+          <!-- Calendar will be rendered by JavaScript -->
+        </div>
+      </div>
+      <div class="upcoming-events-list" id="upcomingEventsList">
+        <!-- Upcoming events list will be rendered by JavaScript -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Squad Management Section -->
+  <section class="dashboard-section squad-section">
+    <div class="container">
+      <div class="section-header-with-action">
+        <div>
+          <h2>Manage Squad</h2>
+          <p>Your team roster and athlete management</p>
+        </div>
+        <button class="btn btn-primary" onclick="showAddToSquadModal()">+ Add to Squad</button>
+      </div>
+      <div class="squad-tabs">
+        <button class="squad-tab active" onclick="switchSquadTab('roster')">Roster</button>
+        <button class="squad-tab" onclick="switchSquadTab('groups')">Groups</button>
+        <button class="squad-tab" onclick="switchSquadTab('notes')">Notes</button>
+      </div>
+      <div id="squadRosterContainer" class="squad-content">
+        <!-- Squad roster will be rendered by JavaScript -->
+      </div>
+      <div id="squadGroupsContainer" class="squad-content hidden">
+        <!-- Squad groups will be rendered by JavaScript -->
+      </div>
+      <div id="squadNotesContainer" class="squad-content hidden">
+        <!-- Squad notes will be rendered by JavaScript -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Watchlist Section -->
+  <section class="dashboard-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Your Watchlist</h2>
+        <p>Athletes you're tracking</p>
+      </div>
+      <div id="watchlistContainer" class="watchlist-grid">
+        <!-- Watchlist will be rendered by JavaScript -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Talent Pool Section -->
+  <section class="dashboard-section talent-pool-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Talent Pool</h2>
+        <p>Browse and discover athletes</p>
+      </div>
+
+      <!-- Filters -->
+      <div class="scout-filters">
+        <div class="filter-group">
+          <input
+            type="text"
+            id="scoutSearchInput"
+            placeholder="Search by name, city, state..."
+            class="search-input"
+          >
+        </div>
+        <div class="filter-group">
+          <select id="scoutSportFilter" class="filter-select">
+            <option value="all">All Sports</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <select id="scoutPositionFilter" class="filter-select" disabled>
+            <option value="all">All Positions</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <select id="scoutYearFilter" class="filter-select">
+            <option value="all">All Years</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Talent Grid -->
+      <div id="talentPoolContainer" class="talent-pool-grid">
+        <!-- Talent cards will be rendered by JavaScript -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Create Event Modal -->
+  <div id="createEventModal" class="modal-overlay hidden">
+    <div class="modal-content modal-medium">
+      <div class="modal-header">
+        <h2>Create Event</h2>
+        <button class="modal-close" onclick="hideCreateEventModal()">&times;</button>
+      </div>
+      <form onsubmit="handleCreateEvent(event)">
+        <div class="form-group">
+          <label for="eventTitle">Event Title *</label>
+          <input type="text" id="eventTitle" required placeholder="e.g., Team Practice, Game vs Hawks">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="eventDate">Date *</label>
+            <input type="date" id="eventDate" required>
+          </div>
+          <div class="form-group">
+            <label for="eventTime">Time</label>
+            <input type="time" id="eventTime">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="eventLocation">Location</label>
+          <input type="text" id="eventLocation" placeholder="e.g., Main Field, Gym A">
+        </div>
+        <div class="form-group">
+          <label for="eventType">Event Type</label>
+          <select id="eventType">
+            <option value="practice">Practice</option>
+            <option value="game">Game</option>
+            <option value="meeting">Meeting</option>
+            <option value="tryout">Tryout</option>
+            <option value="training">Training Session</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="eventDescription">Description</label>
+          <textarea id="eventDescription" rows="3" placeholder="Event details..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="hideCreateEventModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add to Squad Modal -->
+  <div id="addToSquadModal" class="modal-overlay hidden">
+    <div class="modal-content modal-medium">
+      <div class="modal-header">
+        <h2>Add to Squad</h2>
+        <button class="modal-close" onclick="hideAddToSquadModal()">&times;</button>
+      </div>
+      <div class="squad-search-container">
+        <input type="text" id="squadSearchInput" placeholder="Search athletes by name..." oninput="filterSquadAthletes()">
+        <div id="squadSearchResults" class="squad-search-results">
+          <!-- Search results will be rendered here -->
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="hideAddToSquadModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Group Modal -->
+  <div id="createGroupModal" class="modal-overlay hidden">
+    <div class="modal-content modal-medium">
+      <div class="modal-header">
+        <h2>Create Group</h2>
+        <button class="modal-close" onclick="hideCreateGroupModal()">&times;</button>
+      </div>
+      <form onsubmit="handleCreateGroup(event)">
+        <div class="form-group">
+          <label for="groupName">Group Name *</label>
+          <input type="text" id="groupName" required placeholder="e.g., Varsity, JV, Starters">
+        </div>
+        <div class="form-group">
+          <label for="groupColor">Group Color</label>
+          <input type="color" id="groupColor" value="#3b82f6">
+        </div>
+        <div class="form-group">
+          <label for="groupDescription">Description</label>
+          <textarea id="groupDescription" rows="2" placeholder="Group description..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="hideCreateGroupModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Group</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> AthletePro
+        </div>
+        <div class="footer-links">
+          <a href="index.html" class="footer-link">Home</a>
+          <a href="feed.html" class="footer-link">Feed</a>
+          <a href="create.html" class="footer-link">Create Profile</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

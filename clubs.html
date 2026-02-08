@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clubs - AthletePro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="clubs">
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">AthletePro</span>
+            <span class="logo-tagline">Recruit • Connect • Succeed</span>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="index.html" class="nav-link">Athletes</a>
+          <a href="clubs.html" class="nav-link active">Clubs</a>
+          <a href="training.html" class="nav-link">Training</a>
+          <a href="feed.html" class="nav-link">Feed</a>
+          <div id="navUserDisplay" class="auth-logged-in"></div>
+          <a href="login.html" class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
+          <a href="signup.html" class="btn btn-primary auth-logged-out">Sign Up</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Clubs Hero -->
+  <section class="clubs-hero">
+    <div class="container">
+      <div class="clubs-hero-content">
+        <h1>Clubs & Teams</h1>
+        <p>Join a club, track training schedules, and stay connected with your team</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- My Clubs Section -->
+  <section class="clubs-section my-clubs-section">
+    <div class="container">
+      <div class="section-header-with-action">
+        <div>
+          <h2>My Clubs</h2>
+          <p>Clubs you own, coach, or are a member of</p>
+        </div>
+        <button class="btn btn-primary auth-logged-in" onclick="showCreateClubModal()" id="createClubBtn">+ Create Club</button>
+      </div>
+      <div id="myClubsContainer" class="my-clubs-container">
+        <!-- My clubs will be rendered here -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Browse Clubs Section -->
+  <section class="clubs-section browse-clubs-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Browse Clubs</h2>
+        <p>Discover and join clubs in your sport</p>
+      </div>
+
+      <!-- Filters -->
+      <div class="clubs-filters">
+        <div class="filter-group">
+          <input type="text" id="clubSearchInput" placeholder="Search clubs..." class="search-input">
+        </div>
+        <div class="filter-group">
+          <select id="clubSportFilter" class="filter-select">
+            <option value="all">All Sports</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="allClubsContainer" class="clubs-grid">
+        <!-- All clubs will be rendered here -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Create Club Modal -->
+  <div id="createClubModal" class="modal-overlay hidden">
+    <div class="modal-content modal-medium">
+      <div class="modal-header">
+        <h2>Create a New Club</h2>
+        <button class="modal-close" onclick="hideCreateClubModal()">&times;</button>
+      </div>
+      <form onsubmit="handleCreateClub(event)">
+        <div class="form-group">
+          <label for="newClubName">Club Name *</label>
+          <input type="text" id="newClubName" required placeholder="Enter club name">
+        </div>
+        <div class="form-group">
+          <label for="newClubSport">Sport *</label>
+          <select id="newClubSport" required>
+            <option value="">Select Sport</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="newClubDescription">Description</label>
+          <textarea id="newClubDescription" rows="3" placeholder="Tell us about your club"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="newClubLocation">Location</label>
+          <input type="text" id="newClubLocation" placeholder="City, State">
+        </div>
+        <div class="form-group checkbox-group">
+          <label>
+            <input type="checkbox" id="newClubRequireApproval">
+            Require approval for new members
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="hideCreateClubModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Club</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> AthletePro
+        </div>
+        <div class="footer-links">
+          <a href="index.html" class="footer-link">Home</a>
+          <a href="clubs.html" class="footer-link">Clubs</a>
+          <a href="training.html" class="footer-link">Training</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
