@@ -301,7 +301,9 @@ function renderTips() {
 // ==================== PRE-GAME LOCK IN ====================
 
 function openLockInModal() {
-  document.getElementById('lockInModal').classList.remove('hidden');
+  const modal = document.getElementById('lockInModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('active');
   document.body.style.overflow = 'hidden';
 
   // Set default game time to 2 hours from now
@@ -314,7 +316,9 @@ function openLockInModal() {
 }
 
 function closeLockInModal() {
-  document.getElementById('lockInModal').classList.add('hidden');
+  const modal = document.getElementById('lockInModal');
+  modal.classList.remove('active');
+  modal.classList.add('hidden');
   document.body.style.overflow = '';
 }
 
@@ -500,13 +504,17 @@ function toggleBreathing() {
 // ==================== PRO HIGHLIGHTS ====================
 
 async function openHighlightsModal() {
-  document.getElementById('highlightsModal').classList.remove('hidden');
+  const modal = document.getElementById('highlightsModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('active');
   document.body.style.overflow = 'hidden';
   await renderHighlights();
 }
 
 function closeHighlightsModal() {
-  document.getElementById('highlightsModal').classList.add('hidden');
+  const modal = document.getElementById('highlightsModal');
+  modal.classList.remove('active');
+  modal.classList.add('hidden');
   document.body.style.overflow = '';
 }
 
@@ -631,13 +639,17 @@ async function loadAnalysisStats() {
 }
 
 async function openAnalysisModal() {
-  document.getElementById('analysisModal').classList.remove('hidden');
+  const modal = document.getElementById('analysisModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('active');
   document.body.style.overflow = 'hidden';
   await renderSavedAnalyses();
 }
 
 function closeAnalysisModal() {
-  document.getElementById('analysisModal').classList.add('hidden');
+  const modal = document.getElementById('analysisModal');
+  modal.classList.remove('active');
+  modal.classList.add('hidden');
   document.body.style.overflow = '';
 }
 
