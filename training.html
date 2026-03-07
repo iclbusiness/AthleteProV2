@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Training Plans - AthletePro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="training">
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">AthletePro</span>
+            <span class="logo-tagline">Recruit • Connect • Succeed</span>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="reels.html" class="nav-link">Reels</a>
+          <a href="feed.html" class="nav-link">Feed</a>
+          <a href="gameday.html" class="nav-link">Game Day</a>
+          <a href="index.html" class="nav-link">Athletes</a>
+          <a href="training.html" class="nav-link active">Training</a>
+          <div id="navUserDisplay" class="auth-logged-in"></div>
+          <a href="login.html" class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
+          <a href="signup.html" class="btn btn-primary auth-logged-out">Sign Up</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Training Hero -->
+  <section class="training-hero">
+    <div class="container">
+      <div class="training-hero-content">
+        <h1>Training Plans</h1>
+        <p>Structured workout programs created by certified coaches and scouts</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- My Plans Section (for coaches/scouts) -->
+  <section class="training-section my-plans-section">
+    <div class="container">
+      <div class="section-header-with-action">
+        <div>
+          <h2>My Training Plans</h2>
+          <p>Plans you've created</p>
+        </div>
+        <button class="btn btn-primary" onclick="showCreatePlanModal()">+ Create Plan</button>
+      </div>
+      <div id="myPlansContainer">
+        <!-- My plans will be rendered here -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Subscribed Plans Section -->
+  <section class="training-section subscribed-plans-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Subscribed Plans</h2>
+        <p>Plans you're following</p>
+      </div>
+      <div id="subscribedPlansContainer">
+        <!-- Subscribed plans will be rendered here -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Browse Plans Section -->
+  <section class="training-section browse-plans-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Browse Training Plans</h2>
+        <p>Discover workout programs for your sport</p>
+      </div>
+
+      <!-- Filters -->
+      <div class="training-filters">
+        <div class="filter-group">
+          <input type="text" id="trainingSearchInput" placeholder="Search plans..." class="search-input">
+        </div>
+        <div class="filter-group">
+          <select id="trainingSportFilter" class="filter-select">
+            <option value="all">All Sports</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="publicPlansContainer">
+        <!-- Public plans will be rendered here -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Create Plan Modal -->
+  <div id="createPlanModal" class="modal-overlay hidden">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h2>Create Training Plan</h2>
+        <button class="modal-close" onclick="hideCreatePlanModal()">&times;</button>
+      </div>
+      <form onsubmit="handleCreatePlan(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="planTitle">Plan Title *</label>
+            <input type="text" id="planTitle" required placeholder="e.g., Pre-Season Conditioning">
+          </div>
+          <div class="form-group">
+            <label for="planSport">Sport *</label>
+            <select id="planSport" required>
+              <option value="">Select Sport</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="planDifficulty">Difficulty Level</label>
+            <select id="planDifficulty">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+              <option value="elite">Elite</option>
+            </select>
+          </div>
+          <div class="form-group checkbox-group-inline">
+            <label>
+              <input type="checkbox" id="planIsPublic" checked>
+              Make this plan public
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="planDescription">Description</label>
+          <textarea id="planDescription" rows="2" placeholder="Describe your training plan..."></textarea>
+        </div>
+
+        <div class="exercises-section">
+          <div class="exercises-header">
+            <h3>Exercises</h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="addExerciseField()">+ Add Exercise</button>
+          </div>
+          <div id="exercisesList" class="exercises-list">
+            <!-- Exercises will be added here -->
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="hideCreatePlanModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Plan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- View Plan Modal -->
+  <div id="viewPlanModal" class="modal-overlay hidden">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h2>Training Plan</h2>
+        <button class="modal-close" onclick="hideViewPlanModal()">&times;</button>
+      </div>
+      <div id="viewPlanContent">
+        <!-- Plan content will be rendered here -->
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="hideViewPlanModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> AthletePro
+        </div>
+        <div class="footer-links">
+          <a href="index.html" class="footer-link">Home</a>
+          <a href="clubs.html" class="footer-link">Clubs</a>
+          <a href="training.html" class="footer-link">Training</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

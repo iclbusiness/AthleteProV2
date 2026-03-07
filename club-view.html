@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Club - AthletePro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="club-view">
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">AthletePro</span>
+            <span class="logo-tagline">Recruit • Connect • Succeed</span>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="index.html" class="nav-link">Athletes</a>
+          <a href="clubs.html" class="nav-link">Clubs</a>
+          <a href="training.html" class="nav-link">Training</a>
+          <a href="feed.html" class="nav-link">Feed</a>
+          <div id="navUserDisplay" class="auth-logged-in"></div>
+          <a href="login.html" class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
+          <a href="signup.html" class="btn btn-primary auth-logged-out">Sign Up</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Club Header -->
+  <section class="club-header-section">
+    <div class="container">
+      <a href="clubs.html" class="back-link">← Back to Clubs</a>
+      <div id="clubHeader">
+        <!-- Club header will be rendered here -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Club Content -->
+  <section class="club-content-section">
+    <div class="container">
+      <!-- Tabs -->
+      <div id="clubTabs" class="club-tabs">
+        <!-- Tabs will be rendered here -->
+      </div>
+
+      <!-- Tab Contents -->
+      <div class="club-tab-contents">
+        <div id="scheduleTab" class="club-tab-content">
+          <!-- Schedule will be rendered here -->
+        </div>
+        <div id="eventsTab" class="club-tab-content hidden">
+          <!-- Events will be rendered here -->
+        </div>
+        <div id="membersTab" class="club-tab-content hidden">
+          <!-- Members will be rendered here -->
+        </div>
+        <div id="requestsTab" class="club-tab-content hidden">
+          <!-- Membership requests will be rendered here -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Add Event Modal -->
+  <div id="addEventModal" class="modal-overlay hidden">
+    <div class="modal-content modal-medium">
+      <div class="modal-header">
+        <h2>Add Event</h2>
+        <button class="modal-close" onclick="hideAddEventModal()">&times;</button>
+      </div>
+      <form onsubmit="handleCreateEvent(event)">
+        <div class="form-group">
+          <label for="eventTitle">Event Title *</label>
+          <input type="text" id="eventTitle" required placeholder="e.g., Team Practice">
+        </div>
+        <div class="form-group">
+          <label for="eventType">Event Type *</label>
+          <select id="eventType" required>
+            <option value="">Select Type</option>
+            <option value="training">Training Session</option>
+            <option value="game">Game / Match</option>
+            <option value="meeting">Team Meeting</option>
+            <option value="tryout">Tryouts</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="eventStartDate">Start Date & Time *</label>
+            <input type="datetime-local" id="eventStartDate" required>
+          </div>
+          <div class="form-group">
+            <label for="eventEndDate">End Date & Time</label>
+            <input type="datetime-local" id="eventEndDate">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="eventLocation">Location</label>
+          <input type="text" id="eventLocation" placeholder="e.g., Main Stadium">
+        </div>
+        <div class="form-group">
+          <label for="eventDescription">Description</label>
+          <textarea id="eventDescription" rows="3" placeholder="Additional details..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="hideAddEventModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> AthletePro
+        </div>
+        <div class="footer-links">
+          <a href="index.html" class="footer-link">Home</a>
+          <a href="clubs.html" class="footer-link">Clubs</a>
+          <a href="training.html" class="footer-link">Training</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

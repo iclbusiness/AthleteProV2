@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feed - AthletePro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="feed">
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">AthletePro</span>
+            <span class="logo-tagline">Recruit • Connect • Succeed</span>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="reels.html" class="nav-link">Reels</a>
+          <a href="feed.html" class="nav-link active">Feed</a>
+          <a href="gameday.html" class="nav-link">Game Day</a>
+          <a href="index.html" class="nav-link">Athletes</a>
+          <div id="navUserDisplay" class="auth-logged-in"></div>
+          <a href="login.html" class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
+          <a href="signup.html" class="btn btn-primary auth-logged-out">Sign Up</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Feed Content -->
+  <main class="feed-page-v2">
+    <div class="feed-container-v2">
+      <!-- Left Sidebar - Compact -->
+      <aside class="feed-sidebar-left">
+        <div class="sidebar-sticky">
+          <!-- Profile Quick View -->
+          <div class="sidebar-profile auth-logged-in" id="sidebarProfile">
+            <!-- Will be populated by JS -->
+          </div>
+
+          <!-- Navigation -->
+          <nav class="sidebar-nav">
+            <a href="feed.html" class="sidebar-nav-item active">
+              <span class="sidebar-nav-icon">🏠</span>
+              <span>Feed</span>
+            </a>
+            <a href="reels.html" class="sidebar-nav-item">
+              <span class="sidebar-nav-icon">🎬</span>
+              <span>Reels</span>
+            </a>
+            <a href="gameday.html" class="sidebar-nav-item">
+              <span class="sidebar-nav-icon">🔥</span>
+              <span>Game Day</span>
+            </a>
+            <a href="index.html" class="sidebar-nav-item">
+              <span class="sidebar-nav-icon">🏃</span>
+              <span>Athletes</span>
+            </a>
+            <a href="dashboard.html" class="sidebar-nav-item auth-logged-in">
+              <span class="sidebar-nav-icon">⚙️</span>
+              <span>Dashboard</span>
+            </a>
+          </nav>
+
+          <!-- Create Post Button -->
+          <button class="create-post-btn-v2 auth-logged-in" onclick="openCreateModal()">
+            <span>+</span> New Post
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Feed Area -->
+      <div class="feed-main-v2">
+        <!-- Feed Header -->
+        <div class="feed-header-v2">
+          <h1>Your Feed</h1>
+          <div class="feed-tabs-v2">
+            <button class="feed-tab-v2 active" data-feed="explore" onclick="switchFeedTab(this)">
+              Explore
+            </button>
+            <button class="feed-tab-v2" data-feed="following" onclick="switchFeedTab(this)">
+              Following
+            </button>
+            <button class="feed-tab-v2 auth-logged-in" data-feed="bookmarks" onclick="switchFeedTab(this)">
+              Saved
+            </button>
+          </div>
+        </div>
+
+        <!-- Feed Posts Container -->
+        <div id="feedContainer" class="feed-posts-v2">
+          <!-- Posts will be rendered here -->
+        </div>
+      </div>
+
+      <!-- Right Sidebar -->
+      <aside class="feed-sidebar-right">
+        <div class="sidebar-sticky">
+          <!-- Trending / Discover -->
+          <div class="sidebar-section">
+            <h3>Discover Athletes</h3>
+            <div id="suggestedAthletes" class="suggested-list">
+              <!-- Will be populated -->
+            </div>
+            <a href="index.html" class="see-more-link">See all athletes →</a>
+          </div>
+
+          <!-- Trending Sports -->
+          <div class="sidebar-section">
+            <h3>Trending Sports</h3>
+            <div class="trending-sports" id="trendingSports">
+              <!-- Will be populated -->
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Create Post Modal -->
+  <div id="createPostModal" class="modal-overlay hidden">
+    <div class="modal-content create-modal">
+      <div class="modal-header">
+        <h2>Create Post</h2>
+        <button class="modal-close" onclick="closeCreateModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Profile Selector -->
+        <div class="post-as-section auth-logged-in">
+          <span class="post-as-label">Posting as</span>
+          <select id="userSelector" class="post-as-select">
+            <option value="">Select profile...</option>
+          </select>
+        </div>
+
+        <textarea id="postContent" class="post-textarea" placeholder="What's happening in your athletic journey?"></textarea>
+
+        <!-- Media Options -->
+        <div class="post-media-options">
+          <div class="media-tabs">
+            <button type="button" class="media-tab active" onclick="switchUploadTab('upload')">
+              📹 Video
+            </button>
+            <button type="button" class="media-tab" onclick="switchUploadTab('url')">
+              🔗 Link
+            </button>
+            <button type="button" class="media-tab" onclick="switchUploadTab('image')">
+              📷 Photo
+            </button>
+          </div>
+
+          <!-- Video Upload -->
+          <div class="media-panel" id="uploadPanel">
+            <div class="upload-dropzone" id="videoUploadArea" onclick="document.getElementById('postVideoInput').click()">
+              <input type="file" id="postVideoInput" accept="video/*" class="hidden" onchange="handleVideoPreview(this)">
+              <span class="dropzone-icon">🎬</span>
+              <p>Drop video here or click to upload</p>
+              <span class="dropzone-hint">Max 2 min • 50MB</span>
+            </div>
+            <div id="videoUploadPreview" class="media-preview hidden">
+              <video id="videoPreviewPlayer" controls></video>
+              <button type="button" class="remove-media" onclick="clearVideoUpload()">×</button>
+              <span id="videoDuration" class="duration-badge"></span>
+            </div>
+          </div>
+
+          <!-- URL Input -->
+          <div class="media-panel hidden" id="urlPanel">
+            <input type="url" id="postVideoUrl" class="url-input" placeholder="Paste YouTube, Vimeo, or Hudl URL...">
+          </div>
+
+          <!-- Image Upload -->
+          <div class="media-panel hidden" id="imagePanel">
+            <input type="file" id="postImageInput" accept="image/*" class="hidden">
+            <div class="upload-dropzone" onclick="document.getElementById('postImageInput').click()">
+              <span class="dropzone-icon">📷</span>
+              <p>Drop image here or click to upload</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="handleCreatePost()">Post</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer - Minimal -->
+  <footer class="footer-minimal">
+    <div class="container">
+      <span>© 2024 AthletePro</span>
+      <div class="footer-links-minimal">
+        <a href="#">About</a>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    // Render suggested athletes
+    document.addEventListener('DOMContentLoaded', () => {
+      const suggestedContainer = document.getElementById('suggestedAthletes');
+      const athletes = getAthletes().slice(0, 4);
+
+      if (athletes.length === 0) {
+        suggestedContainer.innerHTML = '<p class="text-muted">No athletes yet</p>';
+      } else {
+        suggestedContainer.innerHTML = athletes.map(athlete => `
+          <a href="profile.html?id=${athlete.id}" class="suggested-athlete-v2">
+            ${athlete.photo
+              ? `<img src="${athlete.photo}" alt="${athlete.name}" class="suggested-photo">`
+              : `<div class="suggested-photo-placeholder">${athlete.name.charAt(0)}</div>`
+            }
+            <div class="suggested-details">
+              <span class="suggested-name">${escapeHtml(athlete.name)}</span>
+              <span class="suggested-meta">${getSportName(athlete.sport)}</span>
+            </div>
+          </a>
+        `).join('');
+      }
+
+      // Render sidebar profile
+      const currentUser = getCurrentUser();
+      const sidebarProfile = document.getElementById('sidebarProfile');
+      if (currentUser && sidebarProfile) {
+        sidebarProfile.innerHTML = `
+          <a href="profile.html?id=${currentUser.id}" class="sidebar-profile-link">
+            ${currentUser.photo
+              ? `<img src="${currentUser.photo}" class="sidebar-profile-photo">`
+              : `<div class="sidebar-profile-placeholder">${currentUser.name.charAt(0)}</div>`
+            }
+            <div class="sidebar-profile-info">
+              <span class="sidebar-profile-name">${escapeHtml(currentUser.name)}</span>
+              <span class="sidebar-profile-sport">${getSportName(currentUser.sport)}</span>
+            </div>
+          </a>
+        `;
+      }
+
+      // Render trending sports
+      const trendingSports = document.getElementById('trendingSports');
+      const sports = Object.entries(SPORTS_CONFIG).slice(0, 6);
+      trendingSports.innerHTML = sports.map(([key, sport]) => `
+        <a href="index.html?sport=${key}" class="trending-sport-tag">
+          ${sport.icon || '🏅'} ${sport.name}
+        </a>
+      `).join('');
+    });
+
+    // Modal functions
+    function openCreateModal() {
+      const account = getCurrentAccount();
+      if (!account) {
+        showToast('Please log in to create a post', 'error');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // Populate the user selector with profiles
+      const selector = document.getElementById('userSelector');
+      if (selector) {
+        const profiles = getProfilesByAccount(account.id);
+        const activeProfile = getActiveProfile();
+
+        selector.innerHTML = '<option value="">Select profile...</option>';
+        profiles.forEach(profile => {
+          const selected = activeProfile && activeProfile.id === profile.id ? 'selected' : '';
+          const sportName = getSportName(profile.sport);
+          selector.innerHTML += `<option value="${profile.id}" ${selected}>${escapeHtml(profile.name)} (${sportName})</option>`;
+        });
+
+        if (profiles.length === 0) {
+          selector.innerHTML = '<option value="">No profiles - create one first!</option>';
+          showToast('Create a profile first to make posts', 'info');
+        }
+
+        // Update active profile when selector changes
+        selector.onchange = (e) => {
+          if (e.target.value) {
+            setActiveProfile(e.target.value);
+          }
+        };
+      }
+
+      document.getElementById('createPostModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeCreateModal() {
+      document.getElementById('createPostModal').classList.add('hidden');
+      document.body.style.overflow = '';
+      // Clear form
+      document.getElementById('postContent').value = '';
+      clearVideoUpload();
+    }
+
+    // Update switchUploadTab to handle image panel
+    const originalSwitchUploadTab = window.switchUploadTab;
+    window.switchUploadTab = function(tabType) {
+      const uploadPanel = document.getElementById('uploadPanel');
+      const urlPanel = document.getElementById('urlPanel');
+      const imagePanel = document.getElementById('imagePanel');
+      const tabs = document.querySelectorAll('.media-tab');
+
+      tabs.forEach(tab => tab.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (uploadPanel) uploadPanel.classList.toggle('hidden', tabType !== 'upload');
+      if (urlPanel) urlPanel.classList.toggle('hidden', tabType !== 'url');
+      if (imagePanel) imagePanel.classList.toggle('hidden', tabType !== 'image');
+    };
+
+    window.openCreateModal = openCreateModal;
+    window.closeCreateModal = closeCreateModal;
+  </script>
+</body>
+</html>

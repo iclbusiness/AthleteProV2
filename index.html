@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AthletePro - Athlete Recruiting Platform</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="index">
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">AthletePro</span>
+            <span class="logo-tagline">Recruit • Connect • Succeed</span>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="reels.html" class="nav-link">Reels</a>
+          <a href="feed.html" class="nav-link">Feed</a>
+          <a href="gameday.html" class="nav-link">Game Day</a>
+          <a href="#browse" class="nav-link">Athletes</a>
+          <div id="navUserDisplay" class="auth-logged-in"></div>
+          <a href="login.html" class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
+          <a href="signup.html" class="btn btn-primary auth-logged-out">Join Now</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <!-- Floating Sports Icons -->
+    <div class="sports-icons">
+      <span class="sports-icon">&#9917;</span>
+      <span class="sports-icon">&#127936;</span>
+      <span class="sports-icon">&#127944;</span>
+      <span class="sports-icon">&#9918;</span>
+      <span class="sports-icon">&#127952;</span>
+      <span class="sports-icon">&#127947;</span>
+    </div>
+
+    <div class="container">
+      <div class="hero-content">
+        <h1>Elevate Your <span class="highlight">Athletic Career</span></h1>
+        <p class="hero-subtitle">
+          The ultimate platform for athletes to showcase their talent, connect with recruiters, and get discovered. Build your profile, share highlights, and track your journey to greatness.
+        </p>
+        <div class="hero-buttons">
+          <a href="create.html" class="btn btn-primary btn-lg">Create Your Profile</a>
+          <a href="#browse" class="btn btn-outline btn-lg">Discover Athletes</a>
+        </div>
+
+        <!-- Stats Banner -->
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-value" data-count="500">0</span>
+            <span class="hero-stat-label">Athletes</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-value" data-count="38">0</span>
+            <span class="hero-stat-label">Sports</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-value" data-count="1000">0</span>
+            <span class="hero-stat-label">Highlights</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sports Showcase Grid - All 38 Sports -->
+  <section class="sports-showcase">
+    <div class="container">
+      <h2>38 Sports. One Platform.</h2>
+      <p class="sports-showcase-subtitle">Every athlete deserves a spotlight. Find your sport.</p>
+      <div class="sports-grid-container">
+        <div id="sportsGrid" class="sports-grid">
+          <!-- Sports will be rendered by JavaScript -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="container">
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">&#127942;</div>
+          <h3>Showcase Your Talent</h3>
+          <p>Upload highlight reels from YouTube, Vimeo, VEO, or Hudl. Let your game speak for itself.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#128200;</div>
+          <h3>Track Your Stats</h3>
+          <p>Record your performance metrics with sport-specific stat tracking for any position.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#127758;</div>
+          <h3>Get Discovered</h3>
+          <p>Connect with coaches and recruiters actively searching for talent like yours.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Player of the Day Section -->
+  <section id="potdSection" class="container">
+    <!-- Will be populated by JavaScript -->
+  </section>
+
+  <!-- Search & Filter Section -->
+  <section class="search-section" id="browse">
+    <div class="container">
+      <div class="section-header">
+        <h2>Discover Athletes</h2>
+        <p>Find talented athletes across all sports</p>
+      </div>
+      <div class="search-bar">
+        <div class="search-group search-main">
+          <div class="search-icon">&#128269;</div>
+          <input
+            type="text"
+            id="searchInput"
+            class="search-input"
+            placeholder="Search athletes by name..."
+          >
+        </div>
+        <div class="search-group">
+          <select id="sportFilter" class="search-select">
+            <option value="all">All Sports</option>
+          </select>
+        </div>
+        <div class="search-group">
+          <select id="yearFilter" class="search-select">
+            <option value="all">All Years</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Athletes Grid -->
+  <section class="section">
+    <div class="container">
+      <div id="athletesGrid" class="athletes-grid">
+        <!-- Athletes will be rendered here by JavaScript -->
+        <div class="empty-state">
+          <div class="empty-state-icon">&#127939;</div>
+          <h3>No athletes yet</h3>
+          <p>Be the first to create a profile and showcase your talent!</p>
+          <a href="create.html" class="btn btn-primary mt-2">Create Profile</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Ready to Take Your Game to the Next Level?</h2>
+        <p>Join thousands of athletes already showcasing their talent on AthletePro.</p>
+        <a href="create.html" class="btn btn-primary btn-lg">Get Started Free</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+          AthletePro
+        </div>
+        <div class="footer-links">
+          <a href="index.html" class="footer-link">Home</a>
+          <a href="feed.html" class="footer-link">Feed</a>
+          <a href="create.html" class="footer-link">Create Profile</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Firestore Test Panel -->
+  <section style="padding: 2rem 0; background: #f8f9fa; border-top: 1px solid #e2e8f0;">
+    <div class="container">
+      <h3 style="margin-bottom: 1rem;">🔥 Firestore Test</h3>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+        <button id="btnSaveTest" class="btn btn-primary">Save Test</button>
+        <button id="btnListenLive" class="btn btn-secondary">Listen Live</button>
+      </div>
+      <pre id="firestoreOutput" style="background:#1e1e1e; color:#d4d4d4; padding:1rem; border-radius:8px; min-height:80px; font-size:0.85rem; white-space:pre-wrap; word-break:break-all;">Waiting...</pre>
+    </div>
+  </section>
+
+  <script type="module">
+    import { db } from './firebase.js';
+    import {
+      collection, addDoc, onSnapshot, serverTimestamp
+    } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    const output = document.getElementById('firestoreOutput');
+    const gamedayCol = collection(db, 'gameday');
+    let unsubscribe = null;
+
+    function log(msg) {
+      output.textContent = msg;
+    }
+
+    document.getElementById('btnSaveTest').addEventListener('click', async () => {
+      try {
+        log('Saving...');
+        const ref = await addDoc(gamedayCol, {
+          type: 'test',
+          sport: 'soccer',
+          note: 'Game day test entry',
+          createdAt: serverTimestamp()
+        });
+        log(`Saved! Doc ID: ${ref.id}`);
+      } catch (e) {
+        log(`Error: ${e.message}`);
+      }
+    });
+
+    document.getElementById('btnListenLive').addEventListener('click', () => {
+      if (unsubscribe) {
+        unsubscribe();
+        unsubscribe = null;
+        document.getElementById('btnListenLive').textContent = 'Listen Live';
+        log('Listener stopped.');
+        return;
+      }
+
+      document.getElementById('btnListenLive').textContent = 'Stop Listening';
+      log('Listening for changes...');
+
+      unsubscribe = onSnapshot(gamedayCol, (snapshot) => {
+        const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        log(JSON.stringify(docs, null, 2));
+      }, (e) => {
+        log(`Listener error: ${e.message}`);
+      });
+    });
+  </script>
+
+  <script src="app.js"></script>
+  <script>
+    // Animate stats on scroll
+    const observerOptions = {
+      threshold: 0.5
+    };
+
+    const animateValue = (element, start, end, duration) => {
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        element.textContent = Math.floor(progress * (end - start) + start) + '+';
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        }
+      };
+      window.requestAnimationFrame(step);
+    };
+
+    const statsObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const statValues = entry.target.querySelectorAll('.hero-stat-value');
+          statValues.forEach(stat => {
+            const count = parseInt(stat.dataset.count);
+            animateValue(stat, 0, count, 2000);
+          });
+          statsObserver.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    const heroStats = document.querySelector('.hero-stats');
+    if (heroStats) statsObserver.observe(heroStats);
+
+    // Header scroll effect
+    window.addEventListener('scroll', () => {
+      const header = document.querySelector('.header');
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+  </script>
+</body>
+</html>

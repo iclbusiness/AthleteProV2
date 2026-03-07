@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Day Tools - AthletePro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="gameday">
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">AthletePro</span>
+            <span class="logo-tagline">Recruit * Connect * Succeed</span>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="reels.html" class="nav-link">Reels</a>
+          <a href="feed.html" class="nav-link">Feed</a>
+          <a href="gameday.html" class="nav-link active">Game Day</a>
+          <a href="index.html" class="nav-link">Athletes</a>
+          <div id="navUserDisplay" class="auth-logged-in"></div>
+          <a href="login.html" class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
+          <a href="signup.html" class="btn btn-primary auth-logged-out">Sign Up</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Game Day Hero -->
+  <section class="gameday-hero">
+    <div class="container">
+      <h1>Game Day Tools</h1>
+      <p>Mental prep, pro inspiration, and performance analysis all in one place</p>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="gameday-content">
+    <div class="container">
+      <!-- Feature Cards Grid -->
+      <div class="gameday-grid">
+
+        <!-- Pre-Game Lock In Card -->
+        <div class="gameday-card lockin-card">
+          <div class="card-header">
+            <span class="card-icon">🔒</span>
+            <h2>Pre-Game Lock In</h2>
+          </div>
+          <p class="card-description">Get in the zone before your game. Focus mode, visualization, and mental prep tools.</p>
+
+          <div class="lockin-preview" id="lockinPreview">
+            <div class="countdown-mini">
+              <span id="countdownDisplay">--:--:--</span>
+              <span class="countdown-label">until game time</span>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-block" onclick="openLockInModal()">
+            Start Lock In Mode
+          </button>
+        </div>
+
+        <!-- Pro Highlights Card -->
+        <div class="gameday-card highlights-card">
+          <div class="card-header">
+            <span class="card-icon">⭐</span>
+            <h2>Pro Highlights</h2>
+          </div>
+          <p class="card-description">Watch and learn from the best. Curated professional highlights to inspire your game.</p>
+
+          <div class="highlights-preview" id="highlightsPreview">
+            <!-- Preview thumbnails -->
+          </div>
+
+          <button class="btn btn-primary btn-block" onclick="openHighlightsModal()">
+            Browse Highlights
+          </button>
+        </div>
+
+        <!-- Clip Analysis Card -->
+        <div class="gameday-card analysis-card">
+          <div class="card-header">
+            <span class="card-icon">📊</span>
+            <h2>Clip Analysis</h2>
+          </div>
+          <p class="card-description">Break down your footage. Add annotations, analyze techniques, and track improvement.</p>
+
+          <div class="analysis-preview">
+            <div class="analysis-stats">
+              <div class="stat-item">
+                <span class="stat-number" id="clipsAnalyzed">0</span>
+                <span class="stat-label">Clips Analyzed</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number" id="annotationsCount">0</span>
+                <span class="stat-label">Annotations</span>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-block" onclick="openAnalysisModal()">
+            Analyze Clips
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Quick Tips Section -->
+      <div class="quick-tips-section">
+        <h3>Quick Mental Prep Tips</h3>
+        <div class="tips-grid" id="tipsGrid">
+          <!-- Tips will be populated by JS -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Pre-Game Lock In Modal -->
+  <div id="lockInModal" class="modal-overlay hidden">
+    <div class="modal-content lockin-modal">
+      <div class="modal-header">
+        <h2>🔒 Pre-Game Lock In</h2>
+        <button class="modal-close" onclick="closeLockInModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Setup Phase -->
+        <div id="lockinSetup" class="lockin-phase">
+          <div class="lockin-form">
+            <div class="form-group">
+              <label>Game Time</label>
+              <input type="datetime-local" id="gameTimeInput" class="form-input">
+            </div>
+
+            <div class="form-group">
+              <label>Sport</label>
+              <select id="lockInSport" class="form-select">
+                <option value="">Select your sport...</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Opponent (optional)</label>
+              <input type="text" id="opponentInput" class="form-input" placeholder="Who are you facing?">
+            </div>
+
+            <div class="form-group">
+              <label>Personal Goals for This Game</label>
+              <textarea id="gameGoals" class="form-textarea" placeholder="What do you want to accomplish today?"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Pre-Game Playlist</label>
+              <input type="url" id="playlistUrl" class="form-input" placeholder="Spotify or Apple Music URL (optional)">
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-lg btn-block" onclick="startLockIn()">
+            🔒 Activate Lock In Mode
+          </button>
+        </div>
+
+        <!-- Active Lock In Phase -->
+        <div id="lockinActive" class="lockin-phase hidden">
+          <div class="lockin-countdown">
+            <div class="countdown-display">
+              <div class="countdown-block">
+                <span id="hoursDisplay" class="countdown-number">00</span>
+                <span class="countdown-unit">hours</span>
+              </div>
+              <span class="countdown-sep">:</span>
+              <div class="countdown-block">
+                <span id="minutesDisplay" class="countdown-number">00</span>
+                <span class="countdown-unit">mins</span>
+              </div>
+              <span class="countdown-sep">:</span>
+              <div class="countdown-block">
+                <span id="secondsDisplay" class="countdown-number">00</span>
+                <span class="countdown-unit">secs</span>
+              </div>
+            </div>
+            <p class="countdown-subtitle" id="opponentDisplay"></p>
+          </div>
+
+          <div class="lockin-goals">
+            <h3>Your Goals</h3>
+            <div id="goalsDisplay" class="goals-list"></div>
+          </div>
+
+          <div class="lockin-visualization">
+            <h3>Visualization</h3>
+            <div class="viz-prompt" id="vizPrompt">
+              <p>Close your eyes and picture yourself...</p>
+            </div>
+            <button class="btn btn-secondary" onclick="nextVisualization()">Next Prompt</button>
+          </div>
+
+          <div class="lockin-breathing">
+            <h3>Breathing Exercise</h3>
+            <div class="breathing-circle" id="breathingCircle">
+              <span id="breathingText">Breathe In</span>
+            </div>
+            <button class="btn btn-secondary" onclick="toggleBreathing()">Start Breathing</button>
+          </div>
+
+          <div class="lockin-affirmations">
+            <h3>Affirmation</h3>
+            <p class="affirmation-text" id="affirmationText">"I am prepared. I am focused. I will compete at my best."</p>
+            <button class="btn btn-secondary" onclick="nextAffirmation()">Next Affirmation</button>
+          </div>
+
+          <button class="btn btn-outline btn-block" onclick="endLockIn()">
+            End Lock In
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pro Highlights Modal -->
+  <div id="highlightsModal" class="modal-overlay hidden">
+    <div class="modal-content highlights-modal">
+      <div class="modal-header">
+        <h2>⭐ Pro Highlights</h2>
+        <button class="modal-close" onclick="closeHighlightsModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Sport Filter -->
+        <div class="highlights-filters">
+          <select id="highlightsSportFilter" class="form-select" onchange="filterHighlights()">
+            <option value="">All Sports</option>
+          </select>
+          <select id="highlightsCategoryFilter" class="form-select" onchange="filterHighlights()">
+            <option value="">All Categories</option>
+            <option value="technique">Technique</option>
+            <option value="clutch">Clutch Moments</option>
+            <option value="training">Training</option>
+            <option value="motivation">Motivation</option>
+          </select>
+        </div>
+
+        <!-- Highlights Grid -->
+        <div class="highlights-grid" id="highlightsGrid">
+          <!-- Highlights will be populated -->
+        </div>
+
+        <!-- Add Highlight (for admins/scouts) -->
+        <div class="add-highlight-section auth-logged-in">
+          <button class="btn btn-secondary" onclick="toggleAddHighlight()">+ Add Highlight</button>
+          <div id="addHighlightForm" class="hidden">
+            <div class="form-group">
+              <input type="text" id="highlightTitle" class="form-input" placeholder="Title (e.g., 'Messi's Perfect Free Kick')">
+            </div>
+            <div class="form-group">
+              <input type="url" id="highlightUrl" class="form-input" placeholder="YouTube URL">
+            </div>
+            <div class="form-row">
+              <select id="highlightSport" class="form-select">
+                <option value="">Sport</option>
+              </select>
+              <select id="highlightCategory" class="form-select">
+                <option value="technique">Technique</option>
+                <option value="clutch">Clutch</option>
+                <option value="training">Training</option>
+                <option value="motivation">Motivation</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <textarea id="highlightDescription" class="form-textarea" placeholder="What makes this highlight special? What can athletes learn?"></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="addProHighlight()">Add Highlight</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clip Analysis Modal -->
+  <div id="analysisModal" class="modal-overlay hidden">
+    <div class="modal-content analysis-modal">
+      <div class="modal-header">
+        <h2>📊 Clip Analysis</h2>
+        <button class="modal-close" onclick="closeAnalysisModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Upload Section -->
+        <div id="analysisUpload" class="analysis-section">
+          <div class="upload-dropzone analysis-dropzone" onclick="document.getElementById('analysisVideoInput').click()">
+            <input type="file" id="analysisVideoInput" accept="video/*" class="hidden" onchange="handleAnalysisUpload(this)">
+            <span class="dropzone-icon">🎬</span>
+            <p>Drop your clip here or click to upload</p>
+            <span class="dropzone-hint">Upload footage you want to analyze</span>
+          </div>
+
+          <div class="or-divider">
+            <span>or paste a URL</span>
+          </div>
+
+          <div class="url-input-group">
+            <input type="url" id="analysisVideoUrl" class="form-input" placeholder="Paste YouTube or video URL...">
+            <button class="btn btn-primary" onclick="loadAnalysisUrl()">Load</button>
+          </div>
+        </div>
+
+        <!-- Analysis Workspace -->
+        <div id="analysisWorkspace" class="analysis-section hidden">
+          <div class="analysis-video-container">
+            <video id="analysisVideo" controls></video>
+            <canvas id="annotationCanvas"></canvas>
+
+            <!-- Annotation Tools -->
+            <div class="annotation-toolbar">
+              <button class="tool-btn active" data-tool="pointer" onclick="selectTool('pointer')">
+                <span>👆</span>
+              </button>
+              <button class="tool-btn" data-tool="circle" onclick="selectTool('circle')">
+                <span>⭕</span>
+              </button>
+              <button class="tool-btn" data-tool="arrow" onclick="selectTool('arrow')">
+                <span>➡️</span>
+              </button>
+              <button class="tool-btn" data-tool="draw" onclick="selectTool('draw')">
+                <span>✏️</span>
+              </button>
+              <button class="tool-btn" data-tool="text" onclick="selectTool('text')">
+                <span>💬</span>
+              </button>
+              <div class="tool-colors">
+                <button class="color-btn active" data-color="#ff4444" style="background:#ff4444" onclick="selectColor('#ff4444')"></button>
+                <button class="color-btn" data-color="#44ff44" style="background:#44ff44" onclick="selectColor('#44ff44')"></button>
+                <button class="color-btn" data-color="#4444ff" style="background:#4444ff" onclick="selectColor('#4444ff')"></button>
+                <button class="color-btn" data-color="#ffff44" style="background:#ffff44" onclick="selectColor('#ffff44')"></button>
+              </div>
+              <button class="tool-btn" onclick="clearAnnotations()">
+                <span>🗑️</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Timeline with markers -->
+          <div class="analysis-timeline">
+            <div class="timeline-track" id="timelineTrack">
+              <div class="timeline-progress" id="timelineProgress"></div>
+              <div class="timeline-markers" id="timelineMarkers"></div>
+            </div>
+          </div>
+
+          <!-- Notes Section -->
+          <div class="analysis-notes">
+            <h4>Analysis Notes</h4>
+            <div class="notes-list" id="analysisnotesList">
+              <!-- Notes appear here -->
+            </div>
+            <div class="add-note-form">
+              <input type="text" id="noteInput" class="form-input" placeholder="Add a note at current timestamp...">
+              <button class="btn btn-primary" onclick="addAnalysisNote()">Add Note</button>
+            </div>
+          </div>
+
+          <!-- Save/Export -->
+          <div class="analysis-actions">
+            <button class="btn btn-secondary" onclick="resetAnalysis()">New Clip</button>
+            <button class="btn btn-primary" onclick="saveAnalysis()">Save Analysis</button>
+          </div>
+        </div>
+
+        <!-- Previous Analyses -->
+        <div class="previous-analyses">
+          <h4>Your Saved Analyses</h4>
+          <div id="savedAnalysesList" class="analyses-list">
+            <!-- Saved analyses appear here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer-minimal">
+    <div class="container">
+      <span>© 2024 AthletePro</span>
+      <div class="footer-links-minimal">
+        <a href="#">About</a>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="app.js"></script>
+  <script src="gameday.js"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "athletepro",
+  "version": "1.0.0",
+  "description": "AthletePro - Athlete Recruiting Platform for 38 Sports",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve . -l 3000"
+  },
+  "keywords": [
+    "athletes",
+    "recruiting",
+    "sports",
+    "platform",
+    "highlights"
+  ],
+  "author": "AthletePro Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  }
+}
