@@ -262,12 +262,14 @@ document.addEventListener('DOMContentLoaded', () => {
   initGameDayPage();
 });
 
-async function initGameDayPage() {
+function initGameDayPage() {
   populateSportSelectors();
   renderTips();
-  await checkActiveLockIn();
-  await loadAnalysisStats();
-  await loadHighlightsPreview();
+  // Fire async loads without awaiting — page is interactive immediately,
+  // UI updates when each one resolves (or falls back after 4s timeout)
+  checkActiveLockIn();
+  loadAnalysisStats();
+  loadHighlightsPreview();
 }
 
 function populateSportSelectors() {
