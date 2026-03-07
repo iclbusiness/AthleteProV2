@@ -127,5 +127,90 @@
   </main>
 
   <script src="app.js"></script>
+  <script type="module">
+    import { auth, db } from './firebase.js';
+    import {
+      createUserWithEmailAndPassword,
+      onAuthStateChanged
+    } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import {
+      doc, setDoc
+    } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    // Already signed in — skip signup
+    onAuthStateChanged(auth, (user) => {
+      if (user) window.location.href = 'dashboard.html';
+    });
+
+    const form = document.getElementById('signupForm');
+    const btn  = form.querySelector('[type="submit"]');
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      const name     = document.getElementById('signupName').value.trim();
+      const email    = document.getElementById('signupEmail').value.trim();
+      const password = document.getElementById('signupPassword').value;
+      const confirm  = document.getElementById('signupConfirmPassword').value;
+      const type     = document.querySelector('input[name="accountType"]:checked')?.value || 'athlete';
+
+      if (!name || !email || !password) {
+        showToast('Please fill in all fields', 'error');
+        return;
+      }
+      if (password.length < 6) {
+        showToast('Password must be at least 6 characters', 'error');
+        return;
+      }
+      if (password !== confirm) {
+        showToast('Passwords do not match', 'error');
+        return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = 'Creating Account...';
+
+      try {
+        // Create Firebase Auth account
+        const { user } = await createUserWithEmailAndPassword(auth, email, password);
+
+        // Save profile to Firestore
+        await setDoc(doc(db, 'users', user.uid), {
+          name,
+          email,
+          accountType: type,
+          createdAt: new Date().toISOString()
+        }, { merge: true });
+
+        // Keep localStorage auth in sync so the rest of the app keeps working
+        if (typeof createAccount === 'function') {
+          createAccount(email, password, name, type);
+          loginAccount(email, password);
+        }
+
+        const welcomes = {
+          scout:  'Welcome Scout! Start discovering talent.',
+          coach:  'Welcome Coach! Build your team.',
+          parent: 'Welcome! Support your athlete.',
+        };
+        showToast(welcomes[type] || 'Welcome to AthletePro!', 'success');
+        setTimeout(() => window.location.href = 'dashboard.html', 800);
+      } catch (err) {
+        btn.disabled    = false;
+        btn.textContent = 'Create Account';
+        showToast(authErrMsg(err.code), 'error');
+      }
+    };
+
+    function authErrMsg(code) {
+      const msgs = {
+        'auth/email-already-in-use': 'An account with this email already exists',
+        'auth/invalid-email':        'Invalid email address',
+        'auth/weak-password':        'Password too weak (min 6 characters)',
+      };
+      return msgs[code] || 'Sign up failed. Please try again';
+    }
+  </script>
 </body>
 </html>

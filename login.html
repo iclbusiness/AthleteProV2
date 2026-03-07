@@ -75,5 +75,59 @@
   </main>
 
   <script src="app.js"></script>
+  <script type="module">
+    import { auth } from './firebase.js';
+    import {
+      signInWithEmailAndPassword,
+      onAuthStateChanged
+    } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+    // Already signed in — skip the login page
+    onAuthStateChanged(auth, (user) => {
+      if (user) window.location.href = 'dashboard.html';
+    });
+
+    const form = document.getElementById('loginForm');
+    const btn  = form.querySelector('[type="submit"]');
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      const email    = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      if (!email || !password) {
+        showToast('Please fill in all fields', 'error');
+        return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = 'Logging in...';
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        // Keep localStorage auth in sync so the rest of the app keeps working
+        if (typeof loginAccount === 'function') loginAccount(email, password);
+        showToast('Welcome back!', 'success');
+        setTimeout(() => window.location.href = 'dashboard.html', 800);
+      } catch (err) {
+        btn.disabled    = false;
+        btn.textContent = 'Log In';
+        showToast(authErrMsg(err.code), 'error');
+      }
+    };
+
+    function authErrMsg(code) {
+      const msgs = {
+        'auth/user-not-found':     'No account found with this email',
+        'auth/wrong-password':     'Incorrect password',
+        'auth/invalid-credential': 'Incorrect email or password',
+        'auth/invalid-email':      'Invalid email address',
+        'auth/too-many-requests':  'Too many attempts — try again later',
+      };
+      return msgs[code] || 'Login failed. Please try again';
+    }
+  </script>
 </body>
 </html>
