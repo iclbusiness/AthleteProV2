@@ -113,6 +113,11 @@ function withTimeout(promise, ms = 4000) {
 }
 
 function getFirestoreUserId() {
+  // Prefer Firebase Auth UID so Firestore rules can verify ownership
+  if (typeof auth !== 'undefined' && auth.currentUser) {
+    return auth.currentUser.uid;
+  }
+  // Fallback to localStorage-based user ID for logged-out state
   const user = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
   return user?.id || null;
 }
