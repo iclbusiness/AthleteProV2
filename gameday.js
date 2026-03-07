@@ -103,6 +103,15 @@ let analysisAnnotations = [];
 
 // ==================== FIRESTORE DATA LAYER ====================
 
+// Races a Firestore promise against a 4s timeout so the page never hangs
+// if Firestore isn't set up yet or the network is slow.
+function withTimeout(promise, ms = 4000) {
+  const timer = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('Firestore timeout')), ms)
+  );
+  return Promise.race([promise, timer]);
+}
+
 function getFirestoreUserId() {
   const user = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
   return user?.id || null;
@@ -131,7 +140,7 @@ async function getLockInFromFirestore() {
     return data ? JSON.parse(data) : null;
   }
   try {
-    const doc = await db.collection('lockIns').doc(uid).get();
+    const doc = await withTimeout(db.collection('lockIns').doc(uid).get());
     return doc.exists ? doc.data() : null;
   } catch (e) {
     console.error('Firestore getLockIn error:', e);
@@ -158,7 +167,7 @@ async function deleteLockInFromFirestore() {
 
 async function getProHighlights() {
   try {
-    const snapshot = await db.collection('proHighlights').orderBy('createdAt', 'desc').get();
+    const snapshot = await withTimeout(db.collection('proHighlights').orderBy('createdAt', 'desc').get());
     if (snapshot.empty) {
       await seedDefaultHighlights();
       return DEFAULT_PRO_HIGHLIGHTS;
@@ -211,8 +220,8 @@ async function getClipAnalyses() {
     return data ? JSON.parse(data) : [];
   }
   try {
-    const snapshot = await db.collection('users').doc(uid)
-      .collection('clipAnalyses').orderBy('createdAt', 'desc').get();
+    const snapshot = await withTimeout(db.collection('users').doc(uid)
+      .collection('clipAnalyses').orderBy('createdAt', 'desc').get());
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (e) {
     console.error('Firestore getClipAnalyses error:', e);
