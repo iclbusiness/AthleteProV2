@@ -2670,7 +2670,7 @@ function renderReelsFeed() {
         <div class="reels-empty-icon">🎬</div>
         <h3>No Reels Yet</h3>
         <p>Be the first to share a highlight video!</p>
-        ${isLoggedIn() ? `<a href="create-post.html" class="btn btn-primary">Create Reel</a>` : `<a href="login.html" class="btn btn-primary">Log In to Post</a>`}
+        ${isLoggedIn() ? `<a href="feed.html" class="btn btn-primary">Create Reel</a>` : `<a href="login.html" class="btn btn-primary">Log In to Post</a>`}
       </div>
     `;
     return;
