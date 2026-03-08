@@ -486,6 +486,7 @@ const CLUBS_KEY = 'athletehub_clubs';
 const CLUB_EVENTS_KEY = 'athletehub_club_events';
 const CLUB_MEMBERSHIPS_KEY = 'athletehub_club_memberships';
 const TRAINING_PLANS_KEY = 'athletehub_training_plans';
+const STREAKS_KEY = 'athletehub_streaks';
 
 // Video upload constraints
 const MAX_VIDEO_DURATION = 120; // 2 minutes in seconds
@@ -1017,6 +1018,8 @@ function loginAccount(email, password) {
   }
 
   setCurrentAccount(account.id);
+  // Streak is updated on dashboard visit; just ensure it's initialized here
+  updateStreak(account.id);
   return { success: true, account };
 }
 
@@ -1285,6 +1288,55 @@ function getMessages() {
 
 function saveMessages(messages) {
   localStorage.setItem(MESSAGES_KEY, JSON.stringify(messages));
+}
+
+// ==================== STREAKS ====================
+
+function getStreakData(accountId) {
+  const data = JSON.parse(localStorage.getItem(STREAKS_KEY) || '{}');
+  return data[accountId] || { current: 0, longest: 0, lastActive: null };
+}
+
+function updateStreak(accountId) {
+  const all = JSON.parse(localStorage.getItem(STREAKS_KEY) || '{}');
+  const streak = all[accountId] || { current: 0, longest: 0, lastActive: null };
+
+  const today = new Date().toDateString();
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+  if (streak.lastActive === today) return streak; // already counted today
+
+  const isConsecutive = streak.lastActive === yesterday;
+  streak.current = isConsecutive ? streak.current + 1 : 1;
+  streak.longest = Math.max(streak.longest, streak.current);
+  streak.lastActive = today;
+
+  all[accountId] = streak;
+  localStorage.setItem(STREAKS_KEY, JSON.stringify(all));
+  return streak;
+}
+
+function getStreakEmoji(days) {
+  if (days >= 100) return '💎';
+  if (days >= 30)  return '🏆';
+  if (days >= 14)  return '⚡';
+  if (days >= 7)   return '🔥';
+  if (days >= 3)   return '✨';
+  return '🌱';
+}
+
+function getStreakMilestoneMessage(days) {
+  const milestones = { 3: 'On a roll!', 7: '1-week streak! You\'re committed!', 14: '2-week streak! Elite level focus!', 30: '30-day streak! LEGENDARY!', 100: '100 days! Absolute GOAT!' };
+  return milestones[days] || null;
+}
+
+function checkAndShowStreakToast(streak) {
+  const msg = getStreakMilestoneMessage(streak.current);
+  if (msg) {
+    showToast(`${getStreakEmoji(streak.current)} ${msg} (${streak.current} days)`, 'success');
+  } else if (streak.current > 1) {
+    showToast(`${getStreakEmoji(streak.current)} ${streak.current}-day streak! Keep it up!`, 'success');
+  }
 }
 
 function getConversationById(conversationId) {
@@ -4556,9 +4608,16 @@ function initDashboardPage() {
   const account = getCurrentAccount();
   const profiles = getProfilesByAccount(account.id);
 
+  // Update streak on every dashboard visit
+  const streak = updateStreak(account.id);
+
   renderDashboard(account, profiles);
+  renderStreakWidget(account.id, streak);
   initCalendar();
   updateAuthUI();
+
+  // Show streak toast (small delay so page renders first)
+  setTimeout(() => checkAndShowStreakToast(streak), 600);
 }
 
 function renderDashboard(account, profiles) {
@@ -4620,6 +4679,35 @@ function renderDashboard(account, profiles) {
       `;
     }
   }
+}
+
+function renderStreakWidget(accountId, streak) {
+  const container = document.getElementById('streakWidget');
+  if (!container) return;
+
+  const dots = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 86400000).toDateString();
+    const lastActive = streak.lastActive;
+    // A dot is filled if it's within the current streak window
+    const daysAgo = i;
+    const active = daysAgo < streak.current;
+    dots.push(`<div class="streak-dot ${active ? 'active' : ''}"></div>`);
+  }
+
+  container.innerHTML = `
+    <div class="streak-card">
+      <div class="streak-main">
+        <span class="streak-flame">${getStreakEmoji(streak.current)}</span>
+        <div class="streak-info">
+          <span class="streak-count">${streak.current}</span>
+          <span class="streak-label">day streak</span>
+        </div>
+      </div>
+      <div class="streak-dots">${dots.join('')}</div>
+      <div class="streak-best">Best: ${streak.longest} days</div>
+    </div>
+  `;
 }
 
 function switchProfile(profileId) {
@@ -4887,6 +4975,7 @@ function showNewConversationModal() {
   const modal = document.getElementById('newConversationModal');
   if (modal) {
     modal.classList.remove('hidden');
+    modal.classList.add('active');
     document.getElementById('userSearchInput')?.focus();
     document.getElementById('userSearchResults').innerHTML = '';
   }
@@ -4894,7 +4983,10 @@ function showNewConversationModal() {
 
 function hideNewConversationModal() {
   const modal = document.getElementById('newConversationModal');
-  if (modal) modal.classList.add('hidden');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.classList.add('hidden');
+  }
 }
 
 function searchUsersForConversation() {
@@ -7026,6 +7118,9 @@ window.openConversation = openConversation;
 window.sendMessageHandler = sendMessageHandler;
 window.deleteConversationHandler = deleteConversationHandler;
 window.startNewConversation = startNewConversation;
+window.searchUsersForConversation = searchUsersForConversation;
+window.updateStreak = updateStreak;
+window.getStreakData = getStreakData;
 
 // Scout/Coach dashboard features
 window.addToWatchlistHandler = addToWatchlistHandler;

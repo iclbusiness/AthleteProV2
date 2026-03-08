@@ -105,6 +105,26 @@
     </div>
   </footer>
 
+  <!-- New Conversation Modal -->
+  <div id="newConversationModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>New Conversation</h3>
+        <button class="modal-close" onclick="hideNewConversationModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="userSearchInput">Search users</label>
+          <input type="text" id="userSearchInput" class="form-control" placeholder="Search by name or email..."
+            oninput="searchUsersForConversation()">
+        </div>
+        <div id="userSearchResults" class="user-search-results">
+          <p class="search-hint">Type at least 2 characters to search</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>

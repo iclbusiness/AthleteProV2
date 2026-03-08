@@ -2333,8 +2333,153 @@ select.form-control {
   min-height: calc(100vh - 200px);
 }
 
-.dashboard-header {
+.dashboard-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
   margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+
+.dashboard-header {
+  margin-bottom: 0;
+}
+
+/* ==================== STREAKS ==================== */
+
+.streak-card {
+  background: linear-gradient(135deg, rgba(255, 87, 34, 0.12) 0%, rgba(255, 152, 0, 0.08) 100%);
+  border: 1px solid rgba(255, 87, 34, 0.25);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem 1.5rem;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.streak-main {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.streak-flame {
+  font-size: 2.25rem;
+  line-height: 1;
+  animation: flamePulse 2s ease-in-out infinite;
+}
+
+@keyframes flamePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
+.streak-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.streak-count {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -0.03em;
+}
+
+.streak-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+.streak-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.streak-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-medium);
+  transition: background 0.3s ease;
+}
+
+.streak-dot.active {
+  background: var(--primary);
+  box-shadow: 0 0 6px rgba(255, 87, 34, 0.5);
+}
+
+.streak-best {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* User search results in messaging modal */
+.user-search-results {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 0.5rem;
+}
+
+.user-search-result {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.user-search-result:hover {
+  background: var(--bg-card-hover);
+}
+
+.user-result-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.user-result-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-result-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.user-result-name {
+  font-weight: 600;
+  font-size: 0.925rem;
+  color: var(--text-primary);
+}
+
+.user-result-type,
+.user-result-sport {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.search-hint, .no-results {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  padding: 1rem 0;
+  text-align: center;
 }
 
 .dashboard-header h1 {
