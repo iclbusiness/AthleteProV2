@@ -1347,8 +1347,35 @@ function getConversationById(conversationId) {
 function getConversationBetweenUsers(userId1, userId2) {
   const conversations = getConversations();
   return conversations.find(c =>
-    c.participants.includes(userId1) && c.participants.includes(userId2)
+    !c.isGroup &&
+    c.participants.length === 2 &&
+    c.participants.includes(userId1) &&
+    c.participants.includes(userId2)
   );
+}
+
+function createGroupConversation(participantIds, groupName = null) {
+  const isGroup = participantIds.length > 2;
+  if (!isGroup) {
+    const existing = getConversationBetweenUsers(participantIds[0], participantIds[1]);
+    if (existing) return existing;
+  }
+  const conversations = getConversations();
+  const unreadCount = {};
+  participantIds.forEach(id => { unreadCount[id] = 0; });
+  const conversation = {
+    id: 'conv_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9),
+    participants: participantIds,
+    isGroup,
+    groupName: isGroup ? (groupName || 'Group Chat') : null,
+    lastMessage: null,
+    lastMessageAt: new Date().toISOString(),
+    unreadCount,
+    createdAt: new Date().toISOString()
+  };
+  conversations.push(conversation);
+  saveConversations(conversations);
+  return conversation;
 }
 
 function getConversationsForUser(accountId) {
@@ -4731,6 +4758,7 @@ function getSportEmoji(sport) {
 // ==================== MESSAGES PAGE ====================
 
 let currentConversationId = null;
+let selectedGroupMembers = [];
 
 function initMessagesPage() {
   if (!isLoggedIn()) {
@@ -4760,29 +4788,60 @@ function renderConversationsList() {
   }
 
   conversationsList.innerHTML = conversations.map(conv => {
-    const otherUserId = conv.participants.find(p => p !== account.id);
-    const otherAccount = getAccountById(otherUserId);
-    const otherProfile = otherAccount ? getProfilesByAccount(otherUserId)[0] : null;
     const unread = conv.unreadCount[account.id] || 0;
+    let avatarHtml, displayName, badgeHtml, previewHtml;
+
+    if (conv.isGroup) {
+      const others = conv.participants.filter(p => p !== account.id);
+      const a = getAccountById(others[0]);
+      const b = getAccountById(others[1]);
+      avatarHtml = `
+        <div class="group-avatar-stack">
+          <div class="avatar-a">${(a?.name || 'G')[0].toUpperCase()}</div>
+          <div class="avatar-b">${(b?.name || 'G')[0].toUpperCase()}</div>
+        </div>`;
+      displayName = escapeHtml(conv.groupName || 'Group Chat');
+      badgeHtml = `<span class="conversation-type-badge group">Group · ${conv.participants.length}</span>`;
+    } else {
+      const otherUserId = conv.participants.find(p => p !== account.id);
+      const otherAccount = getAccountById(otherUserId);
+      avatarHtml = `
+        <div class="conversation-avatar">
+          ${otherAccount?.photo
+            ? `<img src="${otherAccount.photo}" alt="${escapeHtml(otherAccount?.name || 'User')}">`
+            : `<div class="avatar-placeholder">${(otherAccount?.name || 'U')[0].toUpperCase()}</div>`
+          }
+        </div>`;
+      displayName = escapeHtml(otherAccount?.name || 'Unknown User');
+      badgeHtml = otherAccount
+        ? `<span class="conversation-type-badge">${ACCOUNT_TYPES[otherAccount.accountType]?.name || otherAccount.accountType}</span>`
+        : '';
+    }
+
+    if (conv.lastMessage) {
+      const txt = conv.lastMessage.content.substring(0, 48) + (conv.lastMessage.content.length > 48 ? '…' : '');
+      if (conv.isGroup && conv.lastMessage.senderId) {
+        const sender = getAccountById(conv.lastMessage.senderId);
+        const sName = sender ? sender.name.split(' ')[0] : 'Someone';
+        previewHtml = `<span class="conversation-preview-sender">${escapeHtml(sName)}: </span>${escapeHtml(txt)}`;
+      } else {
+        previewHtml = escapeHtml(txt);
+      }
+    } else {
+      previewHtml = 'No messages yet';
+    }
 
     return `
       <div class="conversation-item ${currentConversationId === conv.id ? 'active' : ''} ${unread > 0 ? 'unread' : ''}"
            onclick="openConversation('${conv.id}')">
-        <div class="conversation-avatar">
-          ${otherAccount?.photo
-            ? `<img src="${otherAccount.photo}" alt="${otherAccount?.name || 'User'}">`
-            : `<div class="avatar-placeholder">${(otherAccount?.name || 'U')[0].toUpperCase()}</div>`
-          }
-        </div>
+        ${avatarHtml}
         <div class="conversation-info">
           <div class="conversation-header">
-            <span class="conversation-name">${escapeHtml(otherAccount?.name || 'Unknown User')}</span>
+            <span class="conversation-name">${displayName}</span>
             <span class="conversation-time">${formatTimeAgo(conv.lastMessageAt)}</span>
           </div>
-          <div class="conversation-preview">
-            ${conv.lastMessage ? escapeHtml(conv.lastMessage.content.substring(0, 50)) + (conv.lastMessage.content.length > 50 ? '...' : '') : 'No messages yet'}
-          </div>
-          ${otherAccount ? `<span class="conversation-type-badge">${ACCOUNT_TYPES[otherAccount.accountType]?.name || otherAccount.accountType}</span>` : ''}
+          <div class="conversation-preview">${previewHtml}</div>
+          ${badgeHtml}
         </div>
         ${unread > 0 ? `<span class="unread-badge">${unread}</span>` : ''}
       </div>
@@ -4811,22 +4870,40 @@ function renderMessageThread(conversationId) {
 
   if (!conversation) return;
 
-  const otherUserId = conversation.participants.find(p => p !== account.id);
-  const otherAccount = getAccountById(otherUserId);
+  // Build header
+  let headerAvatarHtml, headerNameHtml, headerSubHtml;
+  if (conversation.isGroup) {
+    const others = conversation.participants.filter(p => p !== account.id);
+    const a = getAccountById(others[0]);
+    const b = getAccountById(others[1]);
+    headerAvatarHtml = `
+      <div class="group-avatar-stack">
+        <div class="avatar-a">${(a?.name || 'G')[0].toUpperCase()}</div>
+        <div class="avatar-b">${(b?.name || 'G')[0].toUpperCase()}</div>
+      </div>`;
+    headerNameHtml = escapeHtml(conversation.groupName || 'Group Chat');
+    headerSubHtml = `<span class="thread-participant-count">${conversation.participants.length} members</span>`;
+  } else {
+    const otherUserId = conversation.participants.find(p => p !== account.id);
+    const otherAccount = getAccountById(otherUserId);
+    headerAvatarHtml = `
+      <div class="thread-avatar">
+        ${otherAccount?.photo
+          ? `<img src="${otherAccount.photo}" alt="${escapeHtml(otherAccount?.name || 'User')}">`
+          : `<div class="avatar-placeholder">${(otherAccount?.name || 'U')[0].toUpperCase()}</div>`
+        }
+      </div>`;
+    headerNameHtml = escapeHtml(otherAccount?.name || 'Unknown User');
+    headerSubHtml = `<span class="thread-type">${ACCOUNT_TYPES[otherAccount?.accountType]?.name || ''}</span>`;
+  }
 
-  // Update header
   threadHeader.innerHTML = `
     <div class="thread-user-info">
       <button class="back-btn mobile-only" onclick="closeConversation()">←</button>
-      <div class="thread-avatar">
-        ${otherAccount?.photo
-          ? `<img src="${otherAccount.photo}" alt="${otherAccount?.name || 'User'}">`
-          : `<div class="avatar-placeholder">${(otherAccount?.name || 'U')[0].toUpperCase()}</div>`
-        }
-      </div>
+      ${headerAvatarHtml}
       <div class="thread-name">
-        <h3>${escapeHtml(otherAccount?.name || 'Unknown User')}</h3>
-        <span class="thread-type">${ACCOUNT_TYPES[otherAccount?.accountType]?.name || ''}</span>
+        <h3>${headerNameHtml}</h3>
+        ${headerSubHtml}
       </div>
     </div>
     <div class="thread-actions">
@@ -4837,23 +4914,27 @@ function renderMessageThread(conversationId) {
   // Render messages
   if (messages.length === 0) {
     threadContainer.innerHTML = `
-      <div class="empty-thread">
-        <p>No messages yet. Start the conversation!</p>
-      </div>
-    `;
+      <div class="empty-thread" style="display:flex;align-items:center;justify-content:center;flex:1;color:var(--text-muted);font-size:0.9rem;">
+        No messages yet. Say hello!
+      </div>`;
   } else {
-    threadContainer.innerHTML = messages.map(msg => `
-      <div class="message ${msg.senderId === account.id ? 'sent' : 'received'}">
-        <div class="message-content">${escapeHtml(msg.content)}</div>
-        <div class="message-time">${formatTimeAgo(msg.createdAt)}</div>
-      </div>
-    `).join('');
-
-    // Scroll to bottom
+    threadContainer.innerHTML = messages.map(msg => {
+      const isSent = msg.senderId === account.id;
+      let senderLabel = '';
+      if (conversation.isGroup && !isSent) {
+        const sender = getAccountById(msg.senderId);
+        senderLabel = `<div class="message-sender-label">${escapeHtml(sender?.name || 'Unknown')}</div>`;
+      }
+      return `
+        ${senderLabel}
+        <div class="message ${isSent ? 'sent' : 'received'}">
+          <div class="message-content">${escapeHtml(msg.content)}</div>
+          <div class="message-time">${formatTimeAgo(msg.createdAt)}</div>
+        </div>`;
+    }).join('');
     threadContainer.scrollTop = threadContainer.scrollHeight;
   }
 
-  // Show compose area
   document.getElementById('composeArea').classList.remove('hidden');
 }
 
@@ -4976,8 +5057,13 @@ function showNewConversationModal() {
   if (modal) {
     modal.classList.remove('hidden');
     modal.classList.add('active');
+    selectedGroupMembers = [];
+    renderSelectedMembers();
+    switchConversationTab('dm');
     document.getElementById('userSearchInput')?.focus();
-    document.getElementById('userSearchResults').innerHTML = '';
+    if (document.getElementById('userSearchResults')) {
+      document.getElementById('userSearchResults').innerHTML = '';
+    }
   }
 }
 
@@ -4987,6 +5073,110 @@ function hideNewConversationModal() {
     modal.classList.remove('active');
     modal.classList.add('hidden');
   }
+}
+
+function switchConversationTab(tab) {
+  const dmTab = document.getElementById('dmTabContent');
+  const groupTab = document.getElementById('groupTabContent');
+  document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(tab + 'TabBtn')?.classList.add('active');
+  if (tab === 'dm') {
+    dmTab?.classList.remove('hidden');
+    groupTab?.classList.add('hidden');
+    document.getElementById('userSearchInput')?.focus();
+  } else {
+    dmTab?.classList.add('hidden');
+    groupTab?.classList.remove('hidden');
+    document.getElementById('groupNameInput')?.focus();
+  }
+}
+
+function addMemberToGroup(accountId) {
+  if (!selectedGroupMembers.includes(accountId)) {
+    selectedGroupMembers.push(accountId);
+    renderSelectedMembers();
+    // Clear search after adding
+    const input = document.getElementById('groupUserSearchInput');
+    const results = document.getElementById('groupUserSearchResults');
+    if (input) input.value = '';
+    if (results) results.innerHTML = '';
+  }
+}
+
+function removeMemberFromGroup(accountId) {
+  selectedGroupMembers = selectedGroupMembers.filter(id => id !== accountId);
+  renderSelectedMembers();
+}
+
+function renderSelectedMembers() {
+  const container = document.getElementById('selectedMembersList');
+  if (!container) return;
+  if (selectedGroupMembers.length === 0) {
+    container.innerHTML = '<span style="color:var(--text-muted);font-size:0.82rem;">No members added yet</span>';
+    return;
+  }
+  container.innerHTML = selectedGroupMembers.map(id => {
+    const acc = getAccountById(id);
+    return `<div class="member-chip">${escapeHtml(acc?.name || 'User')}<button class="member-chip-remove" onclick="removeMemberFromGroup('${id}')">×</button></div>`;
+  }).join('');
+}
+
+function searchUsersForGroupAdd() {
+  const query = document.getElementById('groupUserSearchInput')?.value?.toLowerCase();
+  const resultsContainer = document.getElementById('groupUserSearchResults');
+  const account = getCurrentAccount();
+
+  if (!query || query.length < 2) {
+    resultsContainer.innerHTML = '<p class="search-hint">Type at least 2 characters</p>';
+    return;
+  }
+
+  const accounts = getAccounts().filter(a =>
+    a.id !== account.id &&
+    !selectedGroupMembers.includes(a.id) &&
+    (a.name?.toLowerCase().includes(query) || a.email?.toLowerCase().includes(query))
+  );
+
+  if (accounts.length === 0) {
+    resultsContainer.innerHTML = '<p class="no-results">No users found</p>';
+    return;
+  }
+
+  resultsContainer.innerHTML = accounts.slice(0, 8).map(acc => `
+    <div class="user-search-result" onclick="addMemberToGroup('${acc.id}')">
+      <div class="user-result-avatar">
+        ${acc.photo
+          ? `<img src="${acc.photo}" alt="${escapeHtml(acc.name)}">`
+          : `<div class="avatar-placeholder">${acc.name?.charAt(0).toUpperCase() || 'U'}</div>`
+        }
+      </div>
+      <div class="user-result-info">
+        <span class="user-result-name">${escapeHtml(acc.name || 'Unknown')}</span>
+        <span class="user-result-type">${ACCOUNT_TYPES[acc.accountType]?.name || acc.accountType}</span>
+      </div>
+      <span style="color:var(--primary);font-size:1.2rem;margin-left:auto;">+</span>
+    </div>
+  `).join('');
+}
+
+function createGroupConversationHandler() {
+  const account = getCurrentAccount();
+  if (!account) return;
+
+  const groupName = document.getElementById('groupNameInput')?.value?.trim();
+  if (!groupName) {
+    showToast('Please enter a group name', 'error');
+    return;
+  }
+  if (selectedGroupMembers.length < 2) {
+    showToast('Add at least 2 other members', 'error');
+    return;
+  }
+
+  const participantIds = [account.id, ...selectedGroupMembers];
+  const conversation = createGroupConversation(participantIds, groupName);
+  hideNewConversationModal();
+  window.location.href = `messages.html?conv=${conversation.id}`;
 }
 
 function searchUsersForConversation() {
@@ -7119,6 +7309,11 @@ window.sendMessageHandler = sendMessageHandler;
 window.deleteConversationHandler = deleteConversationHandler;
 window.startNewConversation = startNewConversation;
 window.searchUsersForConversation = searchUsersForConversation;
+window.switchConversationTab = switchConversationTab;
+window.addMemberToGroup = addMemberToGroup;
+window.removeMemberFromGroup = removeMemberFromGroup;
+window.searchUsersForGroupAdd = searchUsersForGroupAdd;
+window.createGroupConversationHandler = createGroupConversationHandler;
 window.updateStreak = updateStreak;
 window.getStreakData = getStreakData;
 

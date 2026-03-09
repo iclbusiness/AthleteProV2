@@ -28,7 +28,6 @@
           <a href="feed.html" class="nav-link">Feed</a>
           <a href="gameday.html" class="nav-link">Game Day</a>
           <a href="index.html#browse" class="nav-link">Discover</a>
-          <a href="messages.html" class="nav-link active">Messages</a>
           <div id="navUserDisplay" class="auth-logged-in"></div>
           <a href="login.html" class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
           <a href="signup.html" class="btn btn-primary auth-logged-out">Sign Up</a>
@@ -41,86 +40,109 @@
   <main class="messages-container">
     <div class="container">
       <div class="messages-layout">
-        <!-- Conversations List -->
+
+        <!-- Conversations Sidebar -->
         <aside class="messages-sidebar">
           <div class="messages-sidebar-header">
             <h2>Messages</h2>
+            <button class="new-chat-btn" onclick="showNewConversationModal()">+ New</button>
           </div>
           <div class="messages-search">
-            <input type="text" id="messageSearchInput" placeholder="Search conversations..." class="search-input">
+            <input type="text" id="messageSearchInput" placeholder="Search conversations..."
+              class="search-input">
           </div>
           <div id="conversationsList" class="conversations-list">
-            <!-- Conversations will be rendered here -->
+            <!-- Rendered by JS -->
           </div>
         </aside>
 
         <!-- Message Thread -->
         <section class="messages-thread">
           <div id="threadHeader" class="thread-header">
-            <!-- Thread header will be rendered here -->
-            <div class="empty-thread-header">
+            <div class="empty-thread-header" style="flex:1;">
+              <div class="empty-icon">💬</div>
               <h3>Select a conversation</h3>
-              <p>Choose a conversation from the list to view messages</p>
             </div>
           </div>
           <div id="messageThread" class="message-thread-content">
-            <!-- Messages will be rendered here -->
             <div class="empty-thread-content">
-              <div class="empty-icon">💬</div>
+              <div class="empty-icon">✉️</div>
               <h3>Your messages</h3>
-              <p>Select a conversation to read messages or start a new conversation from an athlete's profile.</p>
+              <p>Select a conversation or start a new one.</p>
             </div>
           </div>
           <div id="composeArea" class="compose-area hidden">
             <div class="compose-input-container">
               <textarea
                 id="messageInput"
-                placeholder="Type your message..."
+                placeholder="Type a message…"
                 rows="1"
-                onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessageHandler(); }"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessageHandler();}"
               ></textarea>
-              <button class="btn btn-primary send-btn" onclick="sendMessageHandler()">
-                Send
-              </button>
+              <button class="btn btn-primary send-btn" onclick="sendMessageHandler()">Send</button>
             </div>
           </div>
         </section>
+
       </div>
     </div>
   </main>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-logo">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> AthletePro
-        </div>
-        <div class="footer-links">
-          <a href="index.html" class="footer-link">Home</a>
-          <a href="feed.html" class="footer-link">Feed</a>
-          <a href="create.html" class="footer-link">Create Profile</a>
-        </div>
-      </div>
-    </div>
-  </footer>
-
   <!-- New Conversation Modal -->
   <div id="newConversationModal" class="modal-overlay hidden">
-    <div class="modal">
+    <div class="modal" style="max-width:480px;">
       <div class="modal-header">
-        <h3>New Conversation</h3>
+        <h3 style="font-size:1.05rem;">New Conversation</h3>
         <button class="modal-close" onclick="hideNewConversationModal()">×</button>
       </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label for="userSearchInput">Search users</label>
-          <input type="text" id="userSearchInput" class="form-control" placeholder="Search by name or email..."
-            oninput="searchUsersForConversation()">
+
+      <!-- Tab bar -->
+      <div style="display:flex;border-bottom:1px solid var(--border-light);">
+        <button id="dmTabBtn" class="modal-tab-btn active" onclick="switchConversationTab('dm')">
+          Direct Message
+        </button>
+        <button id="groupTabBtn" class="modal-tab-btn" onclick="switchConversationTab('group')">
+          Group Chat
+        </button>
+      </div>
+
+      <!-- DM Tab -->
+      <div id="dmTabContent" class="modal-body">
+        <div class="form-group" style="margin-bottom:0.75rem;">
+          <label style="display:block;margin-bottom:0.4rem;color:var(--text-secondary);font-size:0.82rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">Search users</label>
+          <input type="text" id="userSearchInput" class="form-control"
+            placeholder="Name or email…" oninput="searchUsersForConversation()">
         </div>
         <div id="userSearchResults" class="user-search-results">
           <p class="search-hint">Type at least 2 characters to search</p>
         </div>
+      </div>
+
+      <!-- Group Tab -->
+      <div id="groupTabContent" class="modal-body hidden">
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label style="display:block;margin-bottom:0.4rem;color:var(--text-secondary);font-size:0.82rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">Group name</label>
+          <input type="text" id="groupNameInput" class="form-control"
+            placeholder="e.g. Offensive Line, Team Coaches…">
+        </div>
+
+        <div style="margin-bottom:0.5rem;">
+          <label style="display:block;margin-bottom:0.4rem;color:var(--text-secondary);font-size:0.82rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">Members</label>
+          <div id="selectedMembersList" class="selected-members-list">
+            <span style="color:var(--text-muted);font-size:0.82rem;">No members added yet</span>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0.75rem;">
+          <input type="text" id="groupUserSearchInput" class="form-control"
+            placeholder="Search to add members…" oninput="searchUsersForGroupAdd()">
+        </div>
+        <div id="groupUserSearchResults" class="user-search-results"></div>
+
+        <button class="btn btn-primary" style="width:100%;margin-top:1rem;"
+          onclick="createGroupConversationHandler()">
+          Create Group Chat
+        </button>
       </div>
     </div>
   </div>
