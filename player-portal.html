@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Player Portal - AthletePro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="player-portal">
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">AthletePro</span>
+            <span class="logo-tagline">Recruit • Connect • Succeed</span>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="player-portal.html" class="nav-link">My Dashboard</a>
+          <a href="profile.html" class="nav-link">My Profile</a>
+          <a href="offers.html" class="nav-link">College Interest</a>
+          <a href="index.html#browse" class="nav-link">Browse Athletes</a>
+          <div id="navUserDisplay" class="auth-logged-in"></div>
+          <a href="login.html" class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
+          <a href="signup.html" class="btn btn-primary auth-logged-out">Sign Up</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Portal Hero -->
+  <section class="portal-hero">
+    <div class="container">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+        <div>
+          <div class="portal-hero-badge">&#127942; Athlete Portal</div>
+          <h1 id="portalHeroTitle">Player Portal</h1>
+          <p id="portalHeroSub">Welcome back. Your recruiting profile awaits.</p>
+        </div>
+        <div style="display:flex;gap:0.75rem;align-items:center;padding-top:0.5rem;">
+          <a href="profile.html" class="btn btn-secondary btn-sm">View Profile</a>
+          <a href="create.html" class="btn btn-primary btn-sm">Update Stats</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Portal Content -->
+  <main class="portal-page">
+    <div class="container">
+
+      <!-- Recruiting Profile Completion -->
+      <div class="portal-section">
+        <div class="portal-section-header">
+          <h2>&#128203; Recruiting Profile Completion</h2>
+          <span id="completionPercent" class="portal-stat-value" style="font-size:1.4rem;">0%</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="completionBar" style="width: 0%;"></div>
+        </div>
+        <ul class="completion-checklist" id="completionChecklist">
+          <li class="completion-item" data-check="photo">
+            <span class="check-icon">&#10003;</span> Profile Photo
+          </li>
+          <li class="completion-item" data-check="bio">
+            <span class="check-icon">&#10003;</span> Bio
+          </li>
+          <li class="completion-item" data-check="stats">
+            <span class="check-icon">&#10003;</span> Stats Added
+          </li>
+          <li class="completion-item" data-check="video">
+            <span class="check-icon">&#10003;</span> Highlight Video
+          </li>
+          <li class="completion-item" data-check="contact">
+            <span class="check-icon">&#10003;</span> Contact Info
+          </li>
+        </ul>
+      </div>
+
+      <!-- My Stats Summary -->
+      <div class="portal-section">
+        <div class="portal-section-header">
+          <h2>&#128200; My Stats Summary</h2>
+          <a href="create.html" class="btn btn-primary btn-sm">Update Stats</a>
+        </div>
+        <div id="statsSummary" class="portal-stats-row">
+          <div class="portal-empty">
+            <div class="portal-empty-icon">&#128200;</div>
+            <h3>No stats yet</h3>
+            <p>Create a profile to add your performance stats.</p>
+            <a href="create.html" class="btn btn-primary" style="margin-top:1rem;">Create Profile</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- College Interest Board -->
+      <div class="portal-section">
+        <div class="portal-section-header">
+          <h2>&#127979; College Interest Board</h2>
+          <a href="offers.html" class="btn btn-secondary btn-sm">View All</a>
+        </div>
+        <div class="portal-stats-row" style="margin-bottom:1rem;">
+          <div class="portal-stat-card">
+            <div class="portal-stat-value" id="schoolCount">0</div>
+            <div class="portal-stat-label">Schools Tracking You</div>
+          </div>
+          <div class="portal-stat-card">
+            <div class="portal-stat-value" id="offerCount">0</div>
+            <div class="portal-stat-label">Offers Received</div>
+          </div>
+          <div class="portal-stat-card">
+            <div class="portal-stat-value" id="visitCount">0</div>
+            <div class="portal-stat-label">Visits Scheduled</div>
+          </div>
+        </div>
+        <div class="interest-preview" id="topSchoolsList">
+          <div class="portal-empty">
+            <div class="portal-empty-icon">&#127979;</div>
+            <h3>No schools tracked yet</h3>
+            <p>Start adding schools that have shown interest in you.</p>
+            <a href="offers.html" class="btn btn-primary" style="margin-top:1rem;">Add a School</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Highlight Videos -->
+      <div class="portal-section">
+        <div class="portal-section-header">
+          <h2>&#127909; Highlight Videos</h2>
+          <a href="create.html?step=3" class="btn btn-primary btn-sm">Add Video</a>
+        </div>
+        <div id="videosSection">
+          <div class="portal-stat-card" style="display:inline-block; text-align:center; min-width:140px;">
+            <div class="portal-stat-value" id="videoCount">0</div>
+            <div class="portal-stat-label">Videos Added</div>
+          </div>
+          <p style="color: var(--text-secondary); margin-top:1rem; font-size:0.9rem;">Add highlight videos to your profile to get noticed by college coaches.</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="portal-section">
+        <div class="portal-section-header">
+          <h2>&#9889; Quick Actions</h2>
+        </div>
+        <div class="portal-quick-actions">
+          <a href="profile.html" class="portal-quick-card">
+            <span class="portal-quick-icon">&#128100;</span>
+            <div class="portal-quick-title">Update Profile</div>
+            <div class="portal-quick-desc">Edit your public athlete profile</div>
+          </a>
+          <a href="create.html?step=3" class="portal-quick-card">
+            <span class="portal-quick-icon">&#127909;</span>
+            <div class="portal-quick-title">Add Highlight</div>
+            <div class="portal-quick-desc">Upload a new highlight video</div>
+          </a>
+          <a href="offers.html" class="portal-quick-card">
+            <span class="portal-quick-icon">&#127979;</span>
+            <div class="portal-quick-title">Track Offers</div>
+            <div class="portal-quick-desc">Manage college interest &amp; offers</div>
+          </a>
+          <a href="profile.html" class="portal-quick-card" id="viewPublicProfileBtn">
+            <span class="portal-quick-icon">&#127758;</span>
+            <div class="portal-quick-title">View Public Profile</div>
+            <div class="portal-quick-desc">See how coaches see your page</div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> AthletePro
+        </div>
+        <div class="footer-links">
+          <a href="index.html" class="footer-link">Home</a>
+          <a href="offers.html" class="footer-link">College Interest</a>
+          <a href="create.html" class="footer-link">Create Profile</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    (function() {
+      // Auth guard
+      const account = getCurrentAccount();
+      if (!account || account.accountType !== 'athlete') {
+        window.location.href = 'scout-portal.html';
+        return;
+      }
+
+      // Render hero name
+      document.getElementById('portalHeroTitle').textContent = 'Player Portal';
+      document.getElementById('portalHeroSub').textContent =
+        'Welcome back, ' + (account.name || account.email) + '! Manage your recruiting profile.';
+
+      // Update public profile link
+      document.getElementById('viewPublicProfileBtn').href = 'profile.html?id=' + account.id;
+
+      // ---- Profile Completion ----
+      function calcCompletion(profiles) {
+        const checks = {
+          photo: false,
+          bio: false,
+          stats: false,
+          video: false,
+          contact: false
+        };
+        if (profiles && profiles.length > 0) {
+          const active = profiles.find(p => p.active) || profiles[0];
+          if (active) {
+            if (active.photoUrl || active.photo) checks.photo = true;
+            if (active.bio && active.bio.trim().length > 0) checks.bio = true;
+            if (active.stats && Object.keys(active.stats).length > 0) checks.stats = true;
+            if (active.videos && active.videos.length > 0) checks.video = true;
+            if (active.contactEmail || active.phone || (active.contact && Object.keys(active.contact).length > 0)) checks.contact = true;
+          }
+        }
+        // Also check account-level data
+        if (account.photoUrl) checks.photo = true;
+        if (account.bio && account.bio.trim().length > 0) checks.bio = true;
+        if (account.phone || account.contactEmail) checks.contact = true;
+
+        return checks;
+      }
+
+      function renderCompletion(checks) {
+        const keys = Object.keys(checks);
+        const done = keys.filter(k => checks[k]).length;
+        const pct = Math.round((done / keys.length) * 100);
+
+        document.getElementById('completionPercent').textContent = pct + '% Complete';
+        document.getElementById('completionBar').style.width = pct + '%';
+
+        const items = document.querySelectorAll('.completion-item[data-check]');
+        items.forEach(item => {
+          const key = item.getAttribute('data-check');
+          if (checks[key]) {
+            item.classList.add('done');
+          } else {
+            item.classList.remove('done');
+          }
+        });
+      }
+
+      // ---- Stats Summary ----
+      function renderStatsSummary(profiles) {
+        const container = document.getElementById('statsSummary');
+        if (!profiles || profiles.length === 0) return;
+        const active = profiles.find(p => p.active) || profiles[0];
+        if (!active || !active.stats || Object.keys(active.stats).length === 0) return;
+
+        // Count videos
+        const vids = active.videos ? active.videos.length : 0;
+        document.getElementById('videoCount').textContent = vids;
+
+        const statEntries = Object.entries(active.stats).slice(0, 6);
+        if (statEntries.length === 0) return;
+
+        container.innerHTML = statEntries.map(([key, val]) => `
+          <div class="portal-stat-card">
+            <div class="portal-stat-value" style="font-size:1.4rem;">${val}</div>
+            <div class="portal-stat-label">${key.replace(/([A-Z])/g, ' $1').trim()}</div>
+          </div>
+        `).join('');
+      }
+
+      // ---- College Interest ----
+      function renderCollegeInterest(recruiting) {
+        const schoolCount = recruiting.length;
+        const offerCount = recruiting.filter(s =>
+          s.status === 'Verbal Offer' || s.status === 'Written Offer' || s.status === 'Committed'
+        ).length;
+        const visitCount = recruiting.filter(s =>
+          s.status === 'Unofficial Visit Scheduled' || s.status === 'Official Visit Scheduled' ||
+          s.status === 'Unofficial Visit Complete' || s.status === 'Official Visit Complete'
+        ).length;
+
+        document.getElementById('schoolCount').textContent = schoolCount;
+        document.getElementById('offerCount').textContent = offerCount;
+        document.getElementById('visitCount').textContent = visitCount;
+
+        const listEl = document.getElementById('topSchoolsList');
+        if (schoolCount === 0) return;
+
+        const top3 = recruiting.slice(0, 3);
+        listEl.innerHTML = top3.map(school => {
+          const statusClass = getStatusClass(school.status);
+          return `
+            <div class="interest-school-item">
+              <div>
+                <div class="interest-school-name">${escHtml(school.schoolName)}</div>
+                <div style="font-size:0.8rem; color:var(--text-secondary);">${escHtml(school.sport || '')}${school.coachName ? ' &bull; ' + escHtml(school.coachName) : ''}</div>
+              </div>
+              <span class="status-badge ${statusClass}">${escHtml(school.status || 'Contact')}</span>
+            </div>
+          `;
+        }).join('');
+
+        if (schoolCount > 3) {
+          listEl.innerHTML += `
+            <div style="text-align:center; margin-top:0.75rem;">
+              <a href="offers.html" class="btn btn-secondary btn-sm">View All ${schoolCount} Schools</a>
+            </div>
+          `;
+        }
+      }
+
+      function getStatusClass(status) {
+        if (!status) return 'status-contact';
+        const s = status.toLowerCase();
+        if (s.includes('offer') || s.includes('verbal') || s.includes('written')) return 'status-offer';
+        if (s.includes('committed')) return 'status-committed';
+        if (s.includes('visit')) return 'status-visit';
+        if (s.includes('not interested')) return 'status-passed';
+        return 'status-contact';
+      }
+
+      function escHtml(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      // ---- Load Data ----
+      function init() {
+        // Load profiles (try common localStorage keys)
+        let profiles = [];
+        try {
+          const allProfiles = JSON.parse(localStorage.getItem('athletehub_profiles') || '[]');
+          profiles = allProfiles.filter(p => p.accountId === account.id || p.userId === account.id);
+          if (profiles.length === 0) {
+            // try by owner
+            profiles = allProfiles.filter(p => p.owner === account.id);
+          }
+        } catch (e) {}
+
+        // Load recruiting data
+        let recruiting = [];
+        try {
+          recruiting = JSON.parse(localStorage.getItem('athletepro_recruiting_' + account.id) || '[]');
+        } catch (e) {}
+
+        const checks = calcCompletion(profiles);
+        renderCompletion(checks);
+        renderStatsSummary(profiles);
+        renderCollegeInterest(recruiting);
+
+        // Video count from profiles
+        if (profiles.length > 0) {
+          const active = profiles.find(p => p.active) || profiles[0];
+          if (active && active.videos) {
+            document.getElementById('videoCount').textContent = active.videos.length;
+          }
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+      // Also run immediately in case DOM is ready
+      if (document.readyState !== 'loading') init();
+    })();
+  </script>
+</body>
+</html>

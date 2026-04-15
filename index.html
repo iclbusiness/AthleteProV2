@@ -24,10 +24,9 @@
           </div>
         </a>
         <div class="nav-links">
-          <a href="reels.html" class="nav-link">Reels</a>
-          <a href="feed.html" class="nav-link">Feed</a>
-          <a href="gameday.html" class="nav-link">Game Day</a>
-          <a href="#browse" class="nav-link">Discover</a>
+          <a href="#browse" class="nav-link">Browse Athletes</a>
+          <a href="player-portal.html" class="nav-link auth-logged-in">Player Portal</a>
+          <a href="scout-portal.html" class="nav-link auth-logged-in">Scout Portal</a>
           <div id="navUserDisplay" class="auth-logged-in"></div>
           <a href="login.html" class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
           <a href="signup.html" class="btn btn-primary auth-logged-out">Join Now</a>
@@ -35,6 +34,60 @@
       </nav>
     </div>
   </header>
+
+  <!-- Stats Ticker -->
+  <div class="stats-ticker">
+    <div class="stats-ticker-inner">
+      <span class="stats-ticker-item">🏈 Football</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">⚽ Soccer</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🏀 Basketball</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">⚾ Baseball</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🏐 Volleyball</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🏊 Swimming</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🎾 Tennis</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🏋️ Track & Field</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🥊 Wrestling</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🏒 Hockey</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🎳 Lacrosse</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🏑 Field Hockey</span>
+      <span class="stats-ticker-sep">·</span>
+      <!-- repeat for seamless loop -->
+      <span class="stats-ticker-item">🏈 Football</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">⚽ Soccer</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🏀 Basketball</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">⚾ Baseball</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🏐 Volleyball</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🏊 Swimming</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🎾 Tennis</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🏋️ Track & Field</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🥊 Wrestling</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🏒 Hockey</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🎳 Lacrosse</span>
+      <span class="stats-ticker-sep">·</span>
+      <span class="stats-ticker-item">🏑 Field Hockey</span>
+    </div>
+  </div>
 
   <!-- Hero Section -->
   <section class="hero">
@@ -48,15 +101,16 @@
       <span class="sports-icon">&#127947;</span>
     </div>
 
-    <div class="container">
+    <div class="container" style="width:100%;">
       <div class="hero-content">
-        <h1>Elevate Your <span class="highlight">Athletic Career</span></h1>
+        <p style="font-family:var(--font-condensed);font-weight:700;letter-spacing:0.3em;font-size:0.75rem;text-transform:uppercase;color:var(--primary);margin-bottom:1.25rem;">The #1 College Recruiting Platform</p>
+        <h1>Your Name.<br><span class="highlight">Their Roster.</span></h1>
         <p class="hero-subtitle">
-          The ultimate platform for athletes to showcase their talent, connect with recruiters, and get discovered. Build your profile, share highlights, and track your journey to greatness.
+          Build a verified recruiting profile with real stats and film. Get discovered by the coaches who matter. 38 sports. 200+ colleges. One platform.
         </p>
         <div class="hero-buttons">
-          <a href="create.html" class="btn btn-primary btn-lg">Create Your Profile</a>
-          <a href="#browse" class="btn btn-outline btn-lg">Discover Athletes</a>
+          <a href="signup.html" class="btn btn-primary btn-lg">Build My Profile</a>
+          <a href="signup.html?type=scout" class="btn btn-outline btn-lg">I'm a Coach / Scout</a>
         </div>
 
         <!-- Stats Banner -->
@@ -70,11 +124,66 @@
             <span class="hero-stat-label">Sports</span>
           </div>
           <div class="hero-stat">
-            <span class="hero-stat-value" data-count="1000">0</span>
-            <span class="hero-stat-label">Highlights</span>
+            <span class="hero-stat-value" data-count="200">0</span>
+            <span class="hero-stat-label">Colleges Recruiting</span>
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Role Split Section -->
+  <section class="role-split-section">
+    <div class="role-split-grid">
+
+      <!-- Athlete Path -->
+      <a href="signup.html" class="role-split-card athlete-card">
+        <div class="role-split-bg-text">PLAY</div>
+        <span class="role-split-label">For Athletes</span>
+        <h2 class="role-split-title">Get<br>Recruited.</h2>
+        <div class="role-split-features">
+          <div class="role-split-feature">
+            <span class="role-split-feature-dot"></span>
+            Build a verified stat & highlights profile
+          </div>
+          <div class="role-split-feature">
+            <span class="role-split-feature-dot"></span>
+            Track every school's interest in real time
+          </div>
+          <div class="role-split-feature">
+            <span class="role-split-feature-dot"></span>
+            Get seen by 200+ college programs
+          </div>
+        </div>
+        <span class="role-split-cta">
+          Create Athlete Profile <span class="role-split-arrow">→</span>
+        </span>
+      </a>
+
+      <!-- Scout/Coach Path -->
+      <a href="signup.html?type=scout" class="role-split-card scout-card">
+        <div class="role-split-bg-text">SCOUT</div>
+        <span class="role-split-label">For Coaches & Scouts</span>
+        <h2 class="role-split-title">Find Your<br>Next Star.</h2>
+        <div class="role-split-features">
+          <div class="role-split-feature">
+            <span class="role-split-feature-dot"></span>
+            Search 500+ verified athlete profiles
+          </div>
+          <div class="role-split-feature">
+            <span class="role-split-feature-dot"></span>
+            Filter by sport, position, GPA, and grad year
+          </div>
+          <div class="role-split-feature">
+            <span class="role-split-feature-dot"></span>
+            Manage your full recruiting pipeline
+          </div>
+        </div>
+        <span class="role-split-cta">
+          Start Scouting <span class="role-split-arrow">→</span>
+        </span>
+      </a>
+
     </div>
   </section>
 
@@ -94,21 +203,31 @@
   <!-- Features Section -->
   <section class="features-section">
     <div class="container">
+      <div class="section-header">
+        <h2>Built Different.</h2>
+        <div class="section-divider"></div>
+        <p>Every tool you need to get recruited — or find your next recruit.</p>
+      </div>
       <div class="features-grid">
         <div class="feature-card">
-          <div class="feature-icon">&#127942;</div>
-          <h3>Showcase Your Talent</h3>
-          <p>Upload highlight reels from YouTube, Vimeo, VEO, or Hudl. Let your game speak for itself.</p>
-        </div>
-        <div class="feature-card">
           <div class="feature-icon">&#128200;</div>
-          <h3>Track Your Stats</h3>
-          <p>Record your performance metrics with sport-specific stat tracking for any position.</p>
+          <h3>Verified Stat Tracking</h3>
+          <p>Log sport-specific performance stats season by season. Build a proven, data-backed recruiting profile.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">&#127758;</div>
-          <h3>Get Discovered</h3>
-          <p>Connect with coaches and recruiters actively searching for talent like yours.</p>
+          <div class="feature-icon">&#127942;</div>
+          <h3>Highlight Reel Hub</h3>
+          <p>Link your best game film from YouTube, Hudl, VEO, or Vimeo. Let coaches see you in action.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#127979;</div>
+          <h3>College Interest Tracker</h3>
+          <p>Track every school's interest — from first contact to official offer. Never lose track of a conversation.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#128269;</div>
+          <h3>Scout & Coach Portal</h3>
+          <p>Coaches get a dedicated recruiting dashboard: prospect pipelines, filters, notes, and a recruiting calendar.</p>
         </div>
       </div>
     </div>
@@ -169,9 +288,12 @@
   <section class="cta-section">
     <div class="container">
       <div class="cta-content">
-        <h2>Ready to Take Your Game to the Next Level?</h2>
-        <p>Join thousands of athletes already showcasing their talent on AthletePro.</p>
-        <a href="create.html" class="btn btn-primary btn-lg">Get Started Free</a>
+        <h2>Ready to Get Recruited?</h2>
+        <p>Create your free recruiting profile and start getting noticed by college coaches today.</p>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+          <a href="signup.html" class="btn btn-primary btn-lg">Create Athlete Profile</a>
+          <a href="signup.html?type=scout" class="btn btn-outline btn-lg">Coach / Scout Sign Up</a>
+        </div>
       </div>
     </div>
   </section>
@@ -189,8 +311,9 @@
         </div>
         <div class="footer-links">
           <a href="index.html" class="footer-link">Home</a>
-          <a href="feed.html" class="footer-link">Feed</a>
-          <a href="create.html" class="footer-link">Create Profile</a>
+          <a href="player-portal.html" class="footer-link">Player Portal</a>
+          <a href="scout-portal.html" class="footer-link">Scout Portal</a>
+          <a href="signup.html" class="footer-link">Sign Up</a>
         </div>
       </div>
     </div>
@@ -242,6 +365,19 @@
         header.classList.remove('scrolled');
       }
     });
+  </script>
+  <script>
+    // Scroll reveal
+    const revealEls = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('revealed');
+          revealObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(el => revealObserver.observe(el));
   </script>
 </body>
 </html>

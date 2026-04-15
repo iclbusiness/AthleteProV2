@@ -24,10 +24,7 @@
           </div>
         </a>
         <div class="nav-links">
-          <a href="reels.html" class="nav-link">Reels</a>
-          <a href="feed.html" class="nav-link">Feed</a>
-          <a href="gameday.html" class="nav-link">Game Day</a>
-          <a href="index.html#browse" class="nav-link">Discover</a>
+          <a href="index.html#browse" class="nav-link">Browse Athletes</a>
           <a href="login.html" class="btn btn-secondary">Log In</a>
         </div>
       </nav>
@@ -46,14 +43,14 @@
         <form id="signupForm" class="auth-form">
           <!-- Account Type Selection -->
           <div class="form-group">
-            <label>I am a...</label>
+            <label style="font-family:var(--font-condensed);font-size:0.7rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted);">I Am A...</label>
             <div class="account-type-selector">
               <label class="account-type-option">
                 <input type="radio" name="accountType" value="athlete" checked>
                 <div class="account-type-card">
                   <span class="account-type-icon">🏃</span>
                   <span class="account-type-label">Athlete</span>
-                  <span class="account-type-desc">Showcase your talent</span>
+                  <span class="account-type-desc">Build your profile. Get recruited. Track every offer.</span>
                 </div>
               </label>
               <label class="account-type-option">
@@ -61,7 +58,7 @@
                 <div class="account-type-card">
                   <span class="account-type-icon">🔍</span>
                   <span class="account-type-label">Scout</span>
-                  <span class="account-type-desc">Discover talent</span>
+                  <span class="account-type-desc">Search talent. Manage your board. Find the next star.</span>
                 </div>
               </label>
               <label class="account-type-option">
@@ -69,15 +66,15 @@
                 <div class="account-type-card">
                   <span class="account-type-icon">📋</span>
                   <span class="account-type-label">Coach</span>
-                  <span class="account-type-desc">Build your team</span>
+                  <span class="account-type-desc">Run your pipeline. Evaluate recruits. Build your roster.</span>
                 </div>
               </label>
               <label class="account-type-option">
                 <input type="radio" name="accountType" value="parent">
                 <div class="account-type-card">
-                  <span class="account-type-icon">👨‍👩‍👧</span>
+                  <span class="account-type-icon">🏠</span>
                   <span class="account-type-label">Parent</span>
-                  <span class="account-type-desc">Support your athlete</span>
+                  <span class="account-type-desc">Support your athlete's journey to college sports.</span>
                 </div>
               </label>
             </div>
@@ -136,6 +133,13 @@
     import {
       doc, setDoc
     } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    // Pre-select account type from URL param (?type=scout)
+    const urlType = new URLSearchParams(window.location.search).get('type');
+    if (urlType) {
+      const radio = document.querySelector(`input[name="accountType"][value="${urlType}"]`);
+      if (radio) radio.checked = true;
+    }
 
     // Already signed in — skip signup
     onAuthStateChanged(auth, (user) => {
