@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"/home/ian/Vibe Coding Project\" && git status --porcelain | grep -q . && git add -A && git commit -m \"Auto-deploy: $(date '+%Y-%m-%d %H:%M')\" && git push origin main 2>&1 || true",
+            "timeout": 30,
+            "statusMessage": "Pushing to Vercel..."
+          }
+        ]
+      }
+    ]
+  }
+}
