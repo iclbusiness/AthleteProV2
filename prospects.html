@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Prospects - AthletePro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="prospects">
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">AthletePro</span>
+            <span class="logo-tagline">Recruit • Connect • Succeed</span>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="scout-portal.html" class="nav-link">My Dashboard</a>
+          <a href="index.html#browse" class="nav-link">Search Athletes</a>
+          <a href="prospects.html" class="nav-link">My Prospects</a>
+          <div id="navUserDisplay" class="auth-logged-in"></div>
+          <a href="login.html" class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
+          <a href="signup.html" class="btn btn-primary auth-logged-out">Sign Up</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Page Hero -->
+  <section class="portal-hero">
+    <div class="container">
+      <div class="portal-hero-badge scout-badge">&#128270; Scout / Coach</div>
+      <h1>Prospect Manager</h1>
+      <p>Your complete recruiting pipeline</p>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="portal-page">
+    <div class="container">
+
+      <!-- Actions row -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.75rem;">
+        <div>
+          <span id="prospectCountLabel" style="color:var(--text-secondary); font-size:0.95rem;">0 prospects</span>
+        </div>
+        <button class="btn btn-primary" onclick="openAddProspectModal()">+ Add Prospect</button>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <input type="text" id="searchInput" class="form-control search-input" placeholder="Search by name...">
+        <select id="filterSport" class="form-control filter-select">
+          <option value="">All Sports</option>
+          <option value="Football">Football</option>
+          <option value="Basketball">Basketball</option>
+          <option value="Baseball">Baseball</option>
+          <option value="Soccer">Soccer</option>
+          <option value="Volleyball">Volleyball</option>
+          <option value="Track & Field">Track &amp; Field</option>
+          <option value="Lacrosse">Lacrosse</option>
+          <option value="Swimming">Swimming</option>
+          <option value="Tennis">Tennis</option>
+          <option value="Wrestling">Wrestling</option>
+        </select>
+        <select id="filterGradYear" class="form-control filter-select">
+          <option value="">All Grad Years</option>
+          <option value="2025">2025</option>
+          <option value="2026">2026</option>
+          <option value="2027">2027</option>
+          <option value="2028">2028</option>
+          <option value="2029">2029</option>
+        </select>
+        <select id="filterStatus" class="form-control filter-select">
+          <option value="">All Statuses</option>
+          <option value="Watching">Watching</option>
+          <option value="Evaluating">Evaluating</option>
+          <option value="Contacted">Contacted</option>
+          <option value="Offered">Offered</option>
+          <option value="Committed">Committed</option>
+          <option value="Passed">Passed</option>
+        </select>
+      </div>
+
+      <!-- Pipeline Tabs -->
+      <div class="pipeline-tabs" id="pipelineTabs">
+        <button class="pipeline-tab active" data-tab="All" onclick="setTab('All')">All</button>
+        <button class="pipeline-tab" data-tab="Watching" onclick="setTab('Watching')">Watching</button>
+        <button class="pipeline-tab" data-tab="Evaluating" onclick="setTab('Evaluating')">Evaluating</button>
+        <button class="pipeline-tab" data-tab="Offered" onclick="setTab('Offered')">Offered</button>
+        <button class="pipeline-tab" data-tab="Committed" onclick="setTab('Committed')">Committed</button>
+      </div>
+
+      <!-- Prospects Grid -->
+      <div class="recruiting-grid" id="prospectsGrid"></div>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="portal-empty hidden">
+        <div class="portal-empty-icon">&#128270;</div>
+        <h3>No prospects yet</h3>
+        <p>Start building your recruiting pipeline by adding athletes you're evaluating.</p>
+        <button class="btn btn-primary" onclick="openAddProspectModal()" style="margin-top:1rem;">Add First Prospect</button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> AthletePro
+        </div>
+        <div class="footer-links">
+          <a href="scout-portal.html" class="footer-link">Scout Portal</a>
+          <a href="index.html#browse" class="footer-link">Browse Athletes</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Add Prospect Modal -->
+  <div id="addProspectModal" class="modal-overlay hidden">
+    <div class="modal-content modal-medium">
+      <div class="modal-header">
+        <h2 id="prospectModalTitle">Add Prospect</h2>
+        <button class="modal-close" onclick="closeAddProspectModal()">&times;</button>
+      </div>
+      <div id="athleteSearchSection">
+        <div class="form-group">
+          <label for="prospectSearchInput">Search Athletes by Name</label>
+          <input type="text" id="prospectSearchInput" class="form-control" placeholder="Type athlete name..." oninput="searchAthletesInModal()">
+        </div>
+        <div id="prospectSearchResults" style="max-height:220px; overflow-y:auto; margin-bottom:1rem;"></div>
+        <div id="selectedAthleteInfo" class="hidden" style="background:var(--bg-darker); border-radius:var(--radius-md); padding:0.85rem; margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between;">
+          <div>
+            <div id="selectedAthleteName" style="font-weight:700;"></div>
+            <div id="selectedAthleteMeta" style="font-size:0.85rem; color:var(--text-secondary);"></div>
+          </div>
+          <button type="button" class="btn btn-sm btn-secondary" onclick="clearSelectedAthlete()">&#10005;</button>
+        </div>
+      </div>
+      <form id="prospectForm" onsubmit="handleProspectSubmit(event)">
+        <input type="hidden" id="prospectAthleteId">
+        <input type="hidden" id="prospectEditId">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="prospectStatus">Status</label>
+            <select id="prospectStatus" class="form-control">
+              <option value="Watching">Watching</option>
+              <option value="Evaluating">Evaluating</option>
+              <option value="Contacted">Contacted</option>
+              <option value="Offered">Offered</option>
+              <option value="Committed">Committed</option>
+              <option value="Passed">Passed</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="prospectPriority">Priority</label>
+            <select id="prospectPriority" class="form-control">
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="prospectNotes">Notes</label>
+          <textarea id="prospectNotes" class="form-control" rows="3" placeholder="Recruiting evaluation notes..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="prospectNextAction">Next Action</label>
+          <input type="text" id="prospectNextAction" class="form-control" placeholder="e.g., Schedule official visit">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeAddProspectModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="prospectSubmitBtn">Add to Pipeline</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Status Modal -->
+  <div id="editStatusModal" class="modal-overlay hidden">
+    <div class="modal-content" style="max-width:420px;">
+      <div class="modal-header">
+        <h2>Update Prospect</h2>
+        <button class="modal-close" onclick="closeEditStatusModal()">&times;</button>
+      </div>
+      <form id="editStatusForm" onsubmit="handleEditStatus(event)">
+        <input type="hidden" id="editProspectId">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editStatus">Status</label>
+            <select id="editStatus" class="form-control">
+              <option value="Watching">Watching</option>
+              <option value="Evaluating">Evaluating</option>
+              <option value="Contacted">Contacted</option>
+              <option value="Offered">Offered</option>
+              <option value="Committed">Committed</option>
+              <option value="Passed">Passed</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="editPriority">Priority</label>
+            <select id="editPriority" class="form-control">
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="editNotes">Notes</label>
+          <textarea id="editNotes" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="editNextAction">Next Action</label>
+          <input type="text" id="editNextAction" class="form-control" placeholder="e.g., Send offer letter">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeEditStatusModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    (function() {
+      const account = getCurrentAccount();
+      if (!account || (account.accountType !== 'scout' && account.accountType !== 'coach')) {
+        window.location.href = 'player-portal.html';
+        return;
+      }
+
+      const STORAGE_KEY = 'athletepro_prospects_' + account.id;
+      let activeTab = 'All';
+      let allAthletes = [];
+
+      function escHtml(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function loadProspects() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) { return []; }
+      }
+      function saveProspects(arr) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+      }
+
+      function getStatusClass(status) {
+        const map = {
+          'Watching': 'status-watching',
+          'Evaluating': 'status-evaluating',
+          'Contacted': 'status-contact',
+          'Offered': 'status-offer',
+          'Committed': 'status-committed',
+          'Passed': 'status-passed'
+        };
+        return map[status] || 'status-contact';
+      }
+
+      function getPriorityClass(priority) {
+        const map = { 'High': 'status-high', 'Medium': 'status-medium', 'Low': 'status-low' };
+        return map[priority] || 'status-medium';
+      }
+
+      function getFilteredProspects() {
+        let prospects = loadProspects();
+        const q = document.getElementById('searchInput').value.toLowerCase().trim();
+        const sport = document.getElementById('filterSport').value;
+        const year = document.getElementById('filterGradYear').value;
+        const status = document.getElementById('filterStatus').value;
+
+        if (q) prospects = prospects.filter(p => (p.name || '').toLowerCase().includes(q));
+        if (sport) prospects = prospects.filter(p => (p.sport || '').toLowerCase() === sport.toLowerCase());
+        if (year) prospects = prospects.filter(p => String(p.gradYear) === year);
+        if (status) prospects = prospects.filter(p => p.status === status);
+        if (activeTab !== 'All') {
+          if (activeTab === 'Evaluating') {
+            prospects = prospects.filter(p => p.status === 'Evaluating' || p.status === 'Contacted');
+          } else {
+            prospects = prospects.filter(p => p.status === activeTab);
+          }
+        }
+        return prospects;
+      }
+
+      function renderProspects() {
+        const prospects = getFilteredProspects();
+        const grid = document.getElementById('prospectsGrid');
+        const empty = document.getElementById('emptyState');
+
+        document.getElementById('prospectCountLabel').textContent =
+          prospects.length + ' prospect' + (prospects.length !== 1 ? 's' : '');
+
+        if (prospects.length === 0) {
+          grid.innerHTML = '';
+          empty.classList.remove('hidden');
+          return;
+        }
+        empty.classList.add('hidden');
+
+        grid.innerHTML = prospects.map(p => {
+          const statusClass = getStatusClass(p.status);
+          const priorityClass = getPriorityClass(p.priority);
+          const location = [p.city, p.state].filter(Boolean).join(', ');
+          return `
+            <div class="prospect-card">
+              <div class="prospect-card-top">
+                <div>
+                  <div class="prospect-name">${escHtml(p.name)}</div>
+                  <div class="prospect-meta">
+                    ${escHtml(p.sport || '')}${p.position ? ' &bull; ' + escHtml(p.position) : ''}${p.gradYear ? ' &bull; Class of ' + escHtml(p.gradYear) : ''}
+                  </div>
+                  ${location ? `<div class="prospect-meta">&#128205; ${escHtml(location)}</div>` : ''}
+                </div>
+              </div>
+              <div class="prospect-badges">
+                <span class="status-badge ${statusClass}">${escHtml(p.status)}</span>
+                ${p.priority ? `<span class="status-badge ${priorityClass}">${escHtml(p.priority)}</span>` : ''}
+              </div>
+              ${p.notes ? `<div class="prospect-notes">"${escHtml(p.notes.length > 100 ? p.notes.substring(0, 100) + '...' : p.notes)}"</div>` : ''}
+              ${p.nextAction ? `<div style="margin-top:0.5rem; font-size:0.82rem; color:var(--text-secondary);">&#8594; ${escHtml(p.nextAction)}</div>` : ''}
+              <div class="prospect-actions">
+                <a href="profile.html?id=${escHtml(p.athleteId)}" class="btn btn-secondary btn-sm">View Profile</a>
+                <button class="btn btn-sm" style="background:rgba(33,150,243,0.15); color:#64b5f6; border:1px solid rgba(33,150,243,0.3);" onclick="openEditStatusModal('${escHtml(p.id)}')">Edit</button>
+                <button class="btn btn-sm" style="background:rgba(244,67,54,0.15); color:#ef5350; border:1px solid rgba(244,67,54,0.3);" onclick="deleteProspect('${escHtml(p.id)}')">Delete</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // ---- Tab ----
+      window.setTab = function(tab) {
+        activeTab = tab;
+        document.querySelectorAll('.pipeline-tab').forEach(btn => {
+          btn.classList.toggle('active', btn.getAttribute('data-tab') === tab);
+        });
+        renderProspects();
+      };
+
+      // ---- Filter listeners ----
+      ['searchInput', 'filterSport', 'filterGradYear', 'filterStatus'].forEach(id => {
+        document.getElementById(id).addEventListener('input', renderProspects);
+        document.getElementById(id).addEventListener('change', renderProspects);
+      });
+
+      // ---- Add Prospect Modal ----
+      window.openAddProspectModal = function() {
+        document.getElementById('prospectModalTitle').textContent = 'Add Prospect';
+        document.getElementById('prospectSubmitBtn').textContent = 'Add to Pipeline';
+        document.getElementById('prospectEditId').value = '';
+        document.getElementById('prospectAthleteId').value = '';
+        document.getElementById('prospectForm').reset();
+        document.getElementById('prospectSearchInput').value = '';
+        document.getElementById('prospectSearchResults').innerHTML = '';
+        document.getElementById('selectedAthleteInfo').classList.add('hidden');
+        document.getElementById('athleteSearchSection').style.display = '';
+        document.getElementById('addProspectModal').classList.remove('hidden');
+
+        if (typeof getAthletes === 'function') {
+          allAthletes = getAthletes() || [];
+        } else {
+          try { allAthletes = JSON.parse(localStorage.getItem('athletehub_profiles') || '[]'); } catch(e) { allAthletes = []; }
+        }
+      };
+
+      window.closeAddProspectModal = function() {
+        document.getElementById('addProspectModal').classList.add('hidden');
+        document.getElementById('prospectForm').reset();
+        document.getElementById('selectedAthleteInfo').classList.add('hidden');
+        document.getElementById('prospectSearchResults').innerHTML = '';
+      };
+
+      window.searchAthletesInModal = function() {
+        const q = document.getElementById('prospectSearchInput').value.toLowerCase().trim();
+        const resultsEl = document.getElementById('prospectSearchResults');
+        if (!q) { resultsEl.innerHTML = ''; return; }
+
+        const existing = new Set(loadProspects().map(p => String(p.athleteId)));
+        const matches = allAthletes.filter(a => {
+          const name = (a.name || ((a.firstName || '') + ' ' + (a.lastName || '')).trim()).toLowerCase();
+          return name.includes(q);
+        }).slice(0, 8);
+
+        if (matches.length === 0) {
+          resultsEl.innerHTML = '<p style="color:var(--text-secondary); font-size:0.875rem; padding:0.5rem;">No athletes found.</p>';
+          return;
+        }
+
+        resultsEl.innerHTML = matches.map(a => {
+          const name = a.name || ((a.firstName || '') + ' ' + (a.lastName || '')).trim() || 'Unknown';
+          const sport = a.sport || a.primarySport || '';
+          const pos = a.position || '';
+          const year = a.gradYear || a.graduationYear || '';
+          const alreadyAdded = existing.has(String(a.id));
+          return `
+            <div style="padding:0.6rem 0.75rem; cursor:${alreadyAdded ? 'default' : 'pointer'}; border-radius:var(--radius-md); margin-bottom:0.25rem; background:var(--bg-darker); opacity:${alreadyAdded ? '0.5' : '1'};"
+              ${!alreadyAdded ? `onmouseover="this.style.background='var(--bg-card-hover)'" onmouseout="this.style.background='var(--bg-darker)'"
+              onclick="selectAthlete('${escHtml(a.id)}', '${escHtml(name)}', '${escHtml(sport)}', '${escHtml(pos)}', '${escHtml(year)}')"` : ''}>
+              <div style="font-weight:700; font-size:0.9rem;">${escHtml(name)}${alreadyAdded ? ' <span style="color:var(--text-muted); font-size:0.78rem;">(already added)</span>' : ''}</div>
+              <div style="font-size:0.8rem; color:var(--text-secondary);">${escHtml(sport)}${pos ? ' &bull; ' + escHtml(pos) : ''}${year ? ' &bull; Class of ' + escHtml(year) : ''}</div>
+            </div>
+          `;
+        }).join('');
+      };
+
+      window.selectAthlete = function(id, name, sport, pos, year) {
+        document.getElementById('prospectAthleteId').value = id;
+        document.getElementById('selectedAthleteName').textContent = name;
+        document.getElementById('selectedAthleteMeta').textContent = [sport, pos, year ? 'Class of ' + year : ''].filter(Boolean).join(' • ');
+        document.getElementById('selectedAthleteInfo').classList.remove('hidden');
+        document.getElementById('prospectSearchResults').innerHTML = '';
+        document.getElementById('prospectSearchInput').value = name;
+      };
+
+      window.clearSelectedAthlete = function() {
+        document.getElementById('prospectAthleteId').value = '';
+        document.getElementById('selectedAthleteInfo').classList.add('hidden');
+        document.getElementById('prospectSearchInput').value = '';
+      };
+
+      window.handleProspectSubmit = function(e) {
+        e.preventDefault();
+        const editId = document.getElementById('prospectEditId').value;
+        const athleteId = document.getElementById('prospectAthleteId').value;
+
+        if (!editId && !athleteId) {
+          if (typeof showToast === 'function') showToast('Please select an athlete.', 'error');
+          return;
+        }
+
+        const prospects = loadProspects();
+
+        if (editId) {
+          // This path used for add modal when editing — but editing is via editStatusModal
+          // Just update
+        }
+
+        const athlete = allAthletes.find(a => String(a.id) === String(athleteId));
+        const name = athlete
+          ? (athlete.name || ((athlete.firstName || '') + ' ' + (athlete.lastName || '')).trim())
+          : document.getElementById('prospectSearchInput').value;
+
+        const prospectData = {
+          id: Date.now().toString(),
+          athleteId: athleteId,
+          name: name,
+          sport: athlete ? (athlete.sport || athlete.primarySport || '') : '',
+          position: athlete ? (athlete.position || '') : '',
+          gradYear: athlete ? (athlete.gradYear || athlete.graduationYear || '') : '',
+          city: athlete ? (athlete.city || '') : '',
+          state: athlete ? (athlete.state || '') : '',
+          status: document.getElementById('prospectStatus').value,
+          priority: document.getElementById('prospectPriority').value,
+          notes: document.getElementById('prospectNotes').value.trim(),
+          nextAction: document.getElementById('prospectNextAction').value.trim(),
+          addedAt: new Date().toISOString()
+        };
+
+        prospects.push(prospectData);
+        saveProspects(prospects);
+        closeAddProspectModal();
+        renderProspects();
+        if (typeof showToast === 'function') showToast('Prospect added!', 'success');
+      };
+
+      // ---- Edit Status Modal ----
+      window.openEditStatusModal = function(id) {
+        const prospects = loadProspects();
+        const p = prospects.find(x => x.id === id);
+        if (!p) return;
+        document.getElementById('editProspectId').value = id;
+        document.getElementById('editStatus').value = p.status || 'Watching';
+        document.getElementById('editPriority').value = p.priority || 'Medium';
+        document.getElementById('editNotes').value = p.notes || '';
+        document.getElementById('editNextAction').value = p.nextAction || '';
+        document.getElementById('editStatusModal').classList.remove('hidden');
+      };
+      window.closeEditStatusModal = function() {
+        document.getElementById('editStatusModal').classList.add('hidden');
+      };
+      window.handleEditStatus = function(e) {
+        e.preventDefault();
+        const id = document.getElementById('editProspectId').value;
+        const prospects = loadProspects();
+        const idx = prospects.findIndex(p => p.id === id);
+        if (idx === -1) return;
+        prospects[idx].status = document.getElementById('editStatus').value;
+        prospects[idx].priority = document.getElementById('editPriority').value;
+        prospects[idx].notes = document.getElementById('editNotes').value.trim();
+        prospects[idx].nextAction = document.getElementById('editNextAction').value.trim();
+        prospects[idx].updatedAt = new Date().toISOString();
+        saveProspects(prospects);
+        closeEditStatusModal();
+        renderProspects();
+        if (typeof showToast === 'function') showToast('Prospect updated!', 'success');
+      };
+
+      // ---- Delete ----
+      window.deleteProspect = function(id) {
+        if (!confirm('Remove this prospect from your pipeline?')) return;
+        const prospects = loadProspects().filter(p => p.id !== id);
+        saveProspects(prospects);
+        renderProspects();
+        if (typeof showToast === 'function') showToast('Prospect removed.', 'success');
+      };
+
+      // Close modals on overlay click
+      document.getElementById('addProspectModal').addEventListener('click', function(e) {
+        if (e.target === this) closeAddProspectModal();
+      });
+      document.getElementById('editStatusModal').addEventListener('click', function(e) {
+        if (e.target === this) closeEditStatusModal();
+      });
+
+      // Init
+      function init() {
+        renderProspects();
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+      if (document.readyState !== 'loading') init();
+    })();
+  </script>
+</body>
+</html>

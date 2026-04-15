@@ -2089,6 +2089,35 @@ function getFollowingCount(athleteId) {
   return getFollowing(athleteId).length;
 }
 
+function isMutualFollow(userId1, userId2) {
+  return isFollowing(userId1, userId2) && isFollowing(userId2, userId1);
+}
+
+function getMutualCount(athleteId) {
+  const followers = getFollowers(athleteId);
+  const following = getFollowing(athleteId);
+  return followers.filter(id => following.includes(id)).length;
+}
+
+// Returns 'none' | 'following' | 'mutual'
+function getFollowState(currentUserId, athleteId) {
+  if (!isFollowing(currentUserId, athleteId)) return 'none';
+  if (isMutualFollow(currentUserId, athleteId)) return 'mutual';
+  return 'following';
+}
+
+function renderFollowButton(athleteId, currentUserId, size = '') {
+  const sizeClass = size ? `btn-${size}` : '';
+  const state = getFollowState(currentUserId, athleteId);
+  if (state === 'mutual') {
+    return `<button class="btn btn-friends ${sizeClass}" data-follow-id="${athleteId}" onclick="handleFollow('${athleteId}')">Friends ✓</button>`;
+  } else if (state === 'following') {
+    return `<button class="btn btn-secondary following ${sizeClass}" data-follow-id="${athleteId}" onclick="handleFollow('${athleteId}')">Following</button>`;
+  } else {
+    return `<button class="btn btn-primary ${sizeClass}" data-follow-id="${athleteId}" onclick="handleFollow('${athleteId}')">Follow</button>`;
+  }
+}
+
 // ==================== TIME FORMATTING ====================
 
 function timeAgo(dateString) {
@@ -2571,12 +2600,7 @@ function renderReel(post, currentUser = null, index = 0) {
               <span class="reel-author-sport">${sportName}</span>
             </div>
           </a>
-          ${!isLoggedIn() ? '' : `
-            <button class="btn btn-sm ${isFollowing(currentUser?.id, author.id) ? 'btn-secondary' : 'btn-primary'}"
-                    onclick="handleFollow('${author.id}')">
-              ${isFollowing(currentUser?.id, author.id) ? 'Following' : 'Follow'}
-            </button>
-          `}
+          ${currentUser && currentUser.id !== author.id ? renderFollowButton(author.id, currentUser.id, 'sm') : ''}
         </div>
 
         ${post.content ? `
@@ -3455,7 +3479,12 @@ function handleFollow(athleteId) {
     showToast('Unfollowed');
   } else {
     followAthlete(currentUser.id, athleteId);
-    showToast('Following!');
+    if (isFollowing(athleteId, currentUser.id)) {
+      const athlete = getAthleteById(athleteId);
+      showToast(`You and ${athlete?.name || 'this athlete'} are now friends! 🤝`, 'success');
+    } else {
+      showToast('Following!');
+    }
   }
 
   // Update UI
@@ -3466,11 +3495,20 @@ function handleFollow(athleteId) {
 function updateFollowButton(athleteId) {
   const currentUser = getCurrentUser();
   const followBtn = document.querySelector(`[data-follow-id="${athleteId}"]`);
+  if (!followBtn || !currentUser) return;
 
-  if (followBtn && currentUser) {
-    const following = isFollowing(currentUser.id, athleteId);
-    followBtn.textContent = following ? 'Following' : 'Follow';
-    followBtn.classList.toggle('following', following);
+  const state = getFollowState(currentUser.id, athleteId);
+  followBtn.classList.remove('btn-primary', 'btn-secondary', 'btn-friends', 'following');
+
+  if (state === 'mutual') {
+    followBtn.textContent = 'Friends ✓';
+    followBtn.classList.add('btn-friends');
+  } else if (state === 'following') {
+    followBtn.textContent = 'Following';
+    followBtn.classList.add('btn-secondary', 'following');
+  } else {
+    followBtn.textContent = 'Follow';
+    followBtn.classList.add('btn-primary');
   }
 }
 
@@ -4208,6 +4246,7 @@ function renderProfile(athlete) {
   const currentUser = getCurrentUser();
   const isOwnProfile = currentUser && currentUser.id === athlete.id;
   const isFollowingAthlete = currentUser ? isFollowing(currentUser.id, athlete.id) : false;
+  const theyFollowMe = currentUser && !isOwnProfile ? isFollowing(athlete.id, currentUser.id) : false;
 
   // Hero section
   const heroContent = document.getElementById('profileHero');
@@ -4234,6 +4273,7 @@ function renderProfile(athlete) {
             <span><strong id="followingCount">${getFollowingCount(athlete.id)}</strong> following</span>
             ${awardCount > 0 ? `<span><strong>🏆 ${awardCount}</strong> award${awardCount > 1 ? 's' : ''}</span>` : ''}
           </div>
+          ${theyFollowMe && !isFollowingAthlete ? `<div class="follows-you-badge">Follows you</div>` : ''}
           <div class="profile-meta">
             <span>📅 Class of ${athlete.gradYear || 'TBD'}</span>
             ${athlete.city || athlete.state
@@ -4245,13 +4285,7 @@ function renderProfile(athlete) {
           </div>
         </div>
         <div class="profile-actions">
-          ${!isOwnProfile ? `
-            <button class="btn ${isFollowingAthlete ? 'btn-secondary following' : 'btn-primary'}"
-                    data-follow-id="${athlete.id}"
-                    onclick="handleFollow('${athlete.id}')">
-              ${isFollowingAthlete ? 'Following' : 'Follow'}
-            </button>
-          ` : ''}
+          ${!isOwnProfile && currentUser ? renderFollowButton(athlete.id, currentUser.id) : ''}
           <button class="btn btn-secondary" onclick="shareProfile('${athlete.id}')">Share</button>
           ${isOwnProfile ? `<a href="create.html?edit=${athlete.id}" class="btn btn-primary">Edit Profile</a>` : ''}
         </div>

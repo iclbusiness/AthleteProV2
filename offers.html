@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>College Recruiting Tracker - AthletePro</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="offers">
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">AthletePro</span>
+            <span class="logo-tagline">Recruit • Connect • Succeed</span>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="player-portal.html" class="nav-link">My Dashboard</a>
+          <a href="profile.html" class="nav-link">My Profile</a>
+          <a href="offers.html" class="nav-link">College Interest</a>
+          <a href="index.html#browse" class="nav-link">Browse Athletes</a>
+          <div id="navUserDisplay" class="auth-logged-in"></div>
+          <a href="login.html" class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
+          <a href="signup.html" class="btn btn-primary auth-logged-out">Sign Up</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Page Hero -->
+  <section class="portal-hero">
+    <div class="container">
+      <div class="portal-hero-badge">&#127979; College Recruiting</div>
+      <h1>College Recruiting Tracker</h1>
+      <p>Track every school's interest in you</p>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="portal-page">
+    <div class="container">
+
+      <!-- Summary Bar -->
+      <div class="portal-stats-row" style="margin-bottom:1.5rem;">
+        <div class="portal-stat-card">
+          <div class="portal-stat-value" id="statTotalSchools">0</div>
+          <div class="portal-stat-label">Total Schools</div>
+        </div>
+        <div class="portal-stat-card">
+          <div class="portal-stat-value" id="statOffersReceived">0</div>
+          <div class="portal-stat-label">Offers Received</div>
+        </div>
+        <div class="portal-stat-card">
+          <div class="portal-stat-value" id="statVisitsScheduled">0</div>
+          <div class="portal-stat-label">Official Visits</div>
+        </div>
+      </div>
+
+      <!-- Actions row -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.75rem;">
+        <h2 style="font-size:1.3rem; font-weight:700;">My Schools</h2>
+        <button class="btn btn-primary" onclick="openAddSchoolModal()">+ Add School</button>
+      </div>
+
+      <!-- Schools Grid -->
+      <div class="recruiting-grid" id="schoolsGrid">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="portal-empty hidden">
+        <div class="portal-empty-icon">&#127979;</div>
+        <h3>No schools tracked yet</h3>
+        <p>Start adding schools that have shown interest in you — or schools you are interested in!</p>
+        <button class="btn btn-primary" onclick="openAddSchoolModal()" style="margin-top:1rem;">Add First School</button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> AthletePro
+        </div>
+        <div class="footer-links">
+          <a href="player-portal.html" class="footer-link">My Dashboard</a>
+          <a href="profile.html" class="footer-link">My Profile</a>
+          <a href="create.html" class="footer-link">Update Stats</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Add / Edit School Modal -->
+  <div id="schoolModal" class="modal-overlay hidden">
+    <div class="modal-content" style="max-width:580px;">
+      <div class="modal-header">
+        <h2 id="schoolModalTitle">Add School</h2>
+        <button class="modal-close" onclick="closeSchoolModal()">&times;</button>
+      </div>
+      <form id="schoolForm" onsubmit="handleSchoolSubmit(event)">
+        <input type="hidden" id="schoolEditId">
+        <div class="form-group">
+          <label for="schoolName">School Name *</label>
+          <input type="text" id="schoolName" class="form-control" required placeholder="e.g., University of Michigan">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="schoolSport">Sport</label>
+            <input type="text" id="schoolSport" class="form-control" placeholder="e.g., Football">
+          </div>
+          <div class="form-group">
+            <label for="schoolCoachName">Coach Name</label>
+            <input type="text" id="schoolCoachName" class="form-control" placeholder="Coach's name">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="schoolCoachEmail">Coach Email</label>
+            <input type="email" id="schoolCoachEmail" class="form-control" placeholder="coach@university.edu">
+          </div>
+          <div class="form-group">
+            <label for="schoolCoachPhone">Coach Phone</label>
+            <input type="tel" id="schoolCoachPhone" class="form-control" placeholder="(555) 000-0000">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="schoolInterestLevel">Interest Level</label>
+          <select id="schoolInterestLevel" class="form-control">
+            <option value="School Reached Out">School Reached Out</option>
+            <option value="I Contacted Them">I Contacted Them</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="schoolStatus">Status</label>
+          <select id="schoolStatus" class="form-control">
+            <option value="Initial Contact">Initial Contact</option>
+            <option value="Unofficial Visit Scheduled">Unofficial Visit Scheduled</option>
+            <option value="Unofficial Visit Complete">Unofficial Visit Complete</option>
+            <option value="Official Visit Scheduled">Official Visit Scheduled</option>
+            <option value="Official Visit Complete">Official Visit Complete</option>
+            <option value="Verbal Offer">Verbal Offer</option>
+            <option value="Written Offer">Written Offer</option>
+            <option value="Committed">Committed</option>
+            <option value="Not Interested">Not Interested</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="schoolNotes">Notes</label>
+          <textarea id="schoolNotes" class="form-control" rows="3" placeholder="Any notes about this school..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="schoolDateAdded">Date Added</label>
+          <input type="date" id="schoolDateAdded" class="form-control">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeSchoolModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="schoolSubmitBtn">Add School</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    (function() {
+      const account = getCurrentAccount();
+      if (!account || account.accountType !== 'athlete') {
+        window.location.href = 'scout-portal.html';
+        return;
+      }
+
+      const STORAGE_KEY = 'athletepro_recruiting_' + account.id;
+
+      function escHtml(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function loadSchools() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) { return []; }
+      }
+      function saveSchools(arr) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+      }
+
+      function getStatusClass(status) {
+        if (!status) return 'status-contact';
+        const s = status.toLowerCase();
+        if (s.includes('committed')) return 'status-committed';
+        if (s.includes('verbal offer') || s.includes('written offer')) return 'status-offer';
+        if (s.includes('visit')) return 'status-visit';
+        if (s.includes('not interested')) return 'status-passed';
+        return 'status-contact';
+      }
+
+      function formatDate(dateStr) {
+        if (!dateStr) return '';
+        try {
+          const d = new Date(dateStr + (dateStr.includes('T') ? '' : 'T00:00:00'));
+          return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        } catch(e) { return dateStr; }
+      }
+
+      function renderSummary(schools) {
+        document.getElementById('statTotalSchools').textContent = schools.length;
+        const offers = schools.filter(s => s.status === 'Verbal Offer' || s.status === 'Written Offer' || s.status === 'Committed').length;
+        document.getElementById('statOffersReceived').textContent = offers;
+        const visits = schools.filter(s => s.status === 'Official Visit Scheduled' || s.status === 'Official Visit Complete').length;
+        document.getElementById('statVisitsScheduled').textContent = visits;
+      }
+
+      function renderSchools(schools) {
+        const grid = document.getElementById('schoolsGrid');
+        const empty = document.getElementById('emptyState');
+        renderSummary(schools);
+        if (schools.length === 0) {
+          grid.innerHTML = '';
+          empty.classList.remove('hidden');
+          return;
+        }
+        empty.classList.add('hidden');
+        grid.innerHTML = schools.map(school => {
+          const statusClass = getStatusClass(school.status);
+          return `
+            <div class="school-card">
+              <div class="school-card-header">
+                <div>
+                  <div class="school-name">${escHtml(school.schoolName)}</div>
+                  <div class="school-meta">
+                    ${escHtml(school.sport || '')}${school.coachName ? ' &bull; ' + escHtml(school.coachName) : ''}
+                  </div>
+                  ${school.coachEmail ? `<div class="school-meta" style="margin-top:0.2rem;"><a href="mailto:${escHtml(school.coachEmail)}" style="color:var(--secondary);">${escHtml(school.coachEmail)}</a></div>` : ''}
+                </div>
+                <span class="status-badge ${statusClass}">${escHtml(school.status || 'Contact')}</span>
+              </div>
+              <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; margin-bottom:0.5rem;">
+                ${school.interestLevel ? `<span style="font-size:0.78rem; color:var(--text-muted); background:var(--bg-darker); padding:0.2rem 0.6rem; border-radius:999px;">${escHtml(school.interestLevel)}</span>` : ''}
+                ${school.dateAdded ? `<span style="font-size:0.78rem; color:var(--text-muted);">Added ${formatDate(school.dateAdded)}</span>` : ''}
+              </div>
+              ${school.notes ? `<div class="school-notes">${escHtml(school.notes)}</div>` : ''}
+              <div class="school-card-actions">
+                <button class="btn btn-secondary btn-sm" onclick="editSchool('${escHtml(school.id)}')">&#9998; Edit</button>
+                <button class="btn btn-sm" style="background:rgba(244,67,54,0.15); color:#ef5350; border:1px solid rgba(244,67,54,0.3);" onclick="deleteSchool('${escHtml(school.id)}')">&#128465; Delete</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // ---- Modal ----
+      window.openAddSchoolModal = function() {
+        document.getElementById('schoolModalTitle').textContent = 'Add School';
+        document.getElementById('schoolSubmitBtn').textContent = 'Add School';
+        document.getElementById('schoolEditId').value = '';
+        document.getElementById('schoolForm').reset();
+        document.getElementById('schoolDateAdded').value = new Date().toISOString().split('T')[0];
+        document.getElementById('schoolModal').classList.remove('hidden');
+      };
+
+      window.closeSchoolModal = function() {
+        document.getElementById('schoolModal').classList.add('hidden');
+        document.getElementById('schoolForm').reset();
+      };
+
+      window.editSchool = function(id) {
+        const schools = loadSchools();
+        const school = schools.find(s => s.id === id);
+        if (!school) return;
+        document.getElementById('schoolModalTitle').textContent = 'Edit School';
+        document.getElementById('schoolSubmitBtn').textContent = 'Save Changes';
+        document.getElementById('schoolEditId').value = id;
+        document.getElementById('schoolName').value = school.schoolName || '';
+        document.getElementById('schoolSport').value = school.sport || '';
+        document.getElementById('schoolCoachName').value = school.coachName || '';
+        document.getElementById('schoolCoachEmail').value = school.coachEmail || '';
+        document.getElementById('schoolCoachPhone').value = school.coachPhone || '';
+        document.getElementById('schoolInterestLevel').value = school.interestLevel || 'School Reached Out';
+        document.getElementById('schoolStatus').value = school.status || 'Initial Contact';
+        document.getElementById('schoolNotes').value = school.notes || '';
+        document.getElementById('schoolDateAdded').value = school.dateAdded || '';
+        document.getElementById('schoolModal').classList.remove('hidden');
+      };
+
+      window.deleteSchool = function(id) {
+        if (!confirm('Remove this school from your tracker?')) return;
+        const schools = loadSchools().filter(s => s.id !== id);
+        saveSchools(schools);
+        renderSchools(schools);
+        if (typeof showToast === 'function') showToast('School removed.', 'success');
+      };
+
+      window.handleSchoolSubmit = function(e) {
+        e.preventDefault();
+        const schools = loadSchools();
+        const editId = document.getElementById('schoolEditId').value;
+        const schoolData = {
+          schoolName: document.getElementById('schoolName').value.trim(),
+          sport: document.getElementById('schoolSport').value.trim(),
+          coachName: document.getElementById('schoolCoachName').value.trim(),
+          coachEmail: document.getElementById('schoolCoachEmail').value.trim(),
+          coachPhone: document.getElementById('schoolCoachPhone').value.trim(),
+          interestLevel: document.getElementById('schoolInterestLevel').value,
+          status: document.getElementById('schoolStatus').value,
+          notes: document.getElementById('schoolNotes').value.trim(),
+          dateAdded: document.getElementById('schoolDateAdded').value,
+          updatedAt: new Date().toISOString()
+        };
+
+        if (editId) {
+          const idx = schools.findIndex(s => s.id === editId);
+          if (idx !== -1) {
+            schools[idx] = Object.assign({}, schools[idx], schoolData);
+            if (typeof showToast === 'function') showToast('School updated!', 'success');
+          }
+        } else {
+          schoolData.id = Date.now().toString();
+          schoolData.createdAt = new Date().toISOString();
+          schools.push(schoolData);
+          if (typeof showToast === 'function') showToast('School added!', 'success');
+        }
+
+        saveSchools(schools);
+        renderSchools(schools);
+        closeSchoolModal();
+      };
+
+      // Close modal on overlay click
+      document.getElementById('schoolModal').addEventListener('click', function(e) {
+        if (e.target === this) closeSchoolModal();
+      });
+
+      // Init
+      function init() {
+        const schools = loadSchools();
+        renderSchools(schools);
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+      if (document.readyState !== 'loading') init();
+    })();
+  </script>
+</body>
+</html>

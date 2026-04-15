@@ -125,6 +125,25 @@
     </div>
   </footer>
 
+  <script>
+  // Route users to the correct portal based on account type
+  (function() {
+    function routeToPortal() {
+      const accountId = localStorage.getItem('athletehub_current_account');
+      if (!accountId) return; // not logged in, let app.js handle
+      const accounts = JSON.parse(localStorage.getItem('athletehub_accounts') || '[]');
+      const account = accounts.find(a => a.id === accountId);
+      if (!account) return;
+      const type = account.accountType;
+      if (type === 'scout' || type === 'coach') {
+        window.location.replace('scout-portal.html');
+      } else {
+        window.location.replace('player-portal.html');
+      }
+    }
+    routeToPortal();
+  })();
+  </script>
   <script src="app.js"></script>
 </body>
 </html>
