@@ -80,9 +80,11 @@
       onAuthStateChanged
     } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-    // Already signed in — skip the login page
+    // Already signed in — skip the login page (only redirect if localStorage auth is also in sync)
     onAuthStateChanged(auth, (user) => {
-      if (user) window.location.href = 'dashboard.html';
+      if (user && typeof isLoggedIn === 'function' && isLoggedIn()) {
+        window.location.href = 'dashboard.html';
+      }
     });
 
     const form = document.getElementById('loginForm');

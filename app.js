@@ -476,6 +476,7 @@ const POSTS_KEY = 'athletehub_posts';
 const FOLLOWS_KEY = 'athletehub_follows';
 const ACCOUNTS_KEY = 'athletehub_accounts';
 const CURRENT_ACCOUNT_KEY = 'athletehub_current_account';
+const ADMIN_EMAILS = ['ianlin.bts@gmail.com'];
 const ACTIVE_PROFILE_KEY = 'athletehub_active_profile';
 const AWARDS_KEY = 'athletehub_awards';
 const BOOKMARKS_KEY = 'athletehub_bookmarks';
@@ -975,6 +976,7 @@ function createAccount(email, password, name, accountType = 'athlete') {
     password: hashPassword(password), // Simple hash for demo
     name: name,
     accountType: accountType, // athlete, scout, coach, parent
+    isAdmin: ADMIN_EMAILS.includes(email.toLowerCase()),
     photo: null,
     profiles: [], // Array of profile IDs
     watchlist: [], // For scouts/coaches - athlete IDs they're watching
@@ -995,6 +997,7 @@ function getAccountType(accountId) {
 function canUserCreateProfiles() {
   const account = getCurrentAccount();
   if (!account) return false;
+  if (isAdmin()) return true; // admins can always create profiles
   const typeConfig = ACCOUNT_TYPES[account.accountType];
   return typeConfig ? typeConfig.canCreateProfiles : true;
 }
@@ -1002,8 +1005,17 @@ function canUserCreateProfiles() {
 function canUserScout() {
   const account = getCurrentAccount();
   if (!account) return false;
+  if (isAdmin()) return true; // admins can always access scout features
   const typeConfig = ACCOUNT_TYPES[account.accountType];
   return typeConfig ? typeConfig.canScout : false;
+}
+
+function getAdminViewMode() {
+  return localStorage.getItem('athletepro_admin_view') || 'player';
+}
+
+function setAdminViewMode(mode) {
+  localStorage.setItem('athletepro_admin_view', mode);
 }
 
 function loginAccount(email, password) {
@@ -1063,6 +1075,11 @@ function hashPassword(password) {
 
 function isLoggedIn() {
   return getCurrentAccount() !== null;
+}
+
+function isAdmin() {
+  const account = getCurrentAccount();
+  return !!(account && (account.isAdmin === true || ADMIN_EMAILS.includes(account.email)));
 }
 
 // ==================== PROFILE MANAGEMENT ====================
@@ -4474,6 +4491,30 @@ function debounce(func, wait) {
 
 // ==================== AUTH UI ====================
 
+function renderAdminViewBar() {
+  // Remove existing bar to avoid duplicates
+  document.getElementById('adminViewBar')?.remove();
+  if (!isAdmin()) return;
+
+  const mode = getAdminViewMode();
+  const bar = document.createElement('div');
+  bar.id = 'adminViewBar';
+  bar.style.cssText = 'position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:9999;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);border-radius:40px;padding:0.4rem 0.6rem;display:flex;align-items:center;gap:0.5rem;font-size:0.78rem;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
+  bar.innerHTML = `
+    <span style="color:rgba(255,255,255,0.5);padding:0 0.3rem;">&#128274; Admin View:</span>
+    <button id="adminViewPlayer" onclick="switchAdminView('player')" style="border:none;border-radius:20px;padding:0.3rem 0.8rem;cursor:pointer;font-size:0.78rem;font-weight:600;transition:all 0.15s;background:${mode==='player'?'var(--primary)':'transparent'};color:${mode==='player'?'#fff':'rgba(255,255,255,0.5)'};">&#127939; Player</button>
+    <button id="adminViewScout" onclick="switchAdminView('scout')" style="border:none;border-radius:20px;padding:0.3rem 0.8rem;cursor:pointer;font-size:0.78rem;font-weight:600;transition:all 0.15s;background:${mode==='scout'?'#a855f7':'transparent'};color:${mode==='scout'?'#fff':'rgba(255,255,255,0.5)'};">&#128269; Scout</button>
+    <a href="admin.html" style="border:none;border-radius:20px;padding:0.3rem 0.8rem;cursor:pointer;font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.5);text-decoration:none;background:transparent;">&#9881;&#65039; Panel</a>
+  `;
+  document.body.appendChild(bar);
+}
+
+function switchAdminView(mode) {
+  setAdminViewMode(mode);
+  const dest = mode === 'scout' ? 'scout-dashboard.html' : 'dashboard.html';
+  window.location.href = dest;
+}
+
 function updateAuthUI() {
   const account = getCurrentAccount();
   const profile = getActiveProfile();
@@ -4520,6 +4561,18 @@ function updateAuthUI() {
         }
         navLinks.insertBefore(dashboardLink, navUserDisplay);
       }
+
+      // Add Admin Panel link for admins
+      if (isAdmin()) {
+        const adminLink = document.createElement('a');
+        adminLink.href = 'admin.html';
+        adminLink.className = 'nav-link dynamic-nav-link';
+        adminLink.textContent = 'Admin';
+        if (document.body.dataset.page === 'admin') {
+          adminLink.classList.add('active');
+        }
+        navLinks.insertBefore(adminLink, navUserDisplay);
+      }
     }
   }
 
@@ -4544,6 +4597,7 @@ function updateAuthUI() {
           <a href="dashboard.html" class="dropdown-item">My Profiles</a>
           <a href="messages.html" class="dropdown-item">Messages</a>
           ${canUserScout() ? '<a href="scout-dashboard.html" class="dropdown-item">Scout Dashboard</a>' : ''}
+          ${isAdmin() ? '<a href="admin.html" class="dropdown-item">Admin Panel</a>' : ''}
           <a href="settings.html" class="dropdown-item">Settings</a>
           <div class="dropdown-divider"></div>
           <button class="dropdown-item text-danger" onclick="handleLogout()">Log Out</button>
@@ -4551,6 +4605,9 @@ function updateAuthUI() {
       </div>
     `;
   }
+
+  // Render floating admin view switcher bar
+  renderAdminViewBar();
 }
 
 function toggleUserMenu() {
@@ -7317,6 +7374,15 @@ window.handleReelLike = handleReelLike;
 window.toggleReelComments = toggleReelComments;
 window.handleReelComment = handleReelComment;
 window.navigateReel = navigateReel;
+
+// Admin
+window.isAdmin = isAdmin;
+window.getAccounts = getAccounts;
+window.getAthletes = getAthletes;
+window.getAccountById = getAccountById;
+window.updateAccount = updateAccount;
+window.deleteAthlete = deleteAthlete;
+window.switchAdminView = switchAdminView;
 
 // New social features
 window.handleUpvote = handleUpvote;

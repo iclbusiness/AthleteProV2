@@ -141,9 +141,11 @@
       if (radio) radio.checked = true;
     }
 
-    // Already signed in — skip signup
+    // Already signed in — skip signup (only redirect if localStorage auth is also in sync)
     onAuthStateChanged(auth, (user) => {
-      if (user) window.location.href = 'dashboard.html';
+      if (user && typeof isLoggedIn === 'function' && isLoggedIn()) {
+        window.location.href = 'dashboard.html';
+      }
     });
 
     const form = document.getElementById('signupForm');
@@ -180,10 +182,12 @@
         const { user } = await createUserWithEmailAndPassword(auth, email, password);
 
         // Save profile to Firestore
+        const ADMIN_EMAILS = ['ianlin.bts@gmail.com'];
         await setDoc(doc(db, 'users', user.uid), {
           name,
           email,
           accountType: type,
+          isAdmin: ADMIN_EMAILS.includes(email.toLowerCase()),
           createdAt: new Date().toISOString()
         }, { merge: true });
 

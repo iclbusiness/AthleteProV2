@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - AthletePro</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .admin-page { padding: 2rem 0; min-height: 100vh; }
+    .admin-header { margin-bottom: 2rem; }
+    .admin-header h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+    .admin-header p { color: var(--text-muted); }
+    .admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .admin-stat-card { background: var(--card-bg, #1a1a2e); border: 1px solid var(--border, rgba(255,255,255,0.08)); border-radius: 12px; padding: 1.25rem; text-align: center; }
+    .admin-stat-value { font-size: 2rem; font-weight: 800; color: var(--primary); display: block; }
+    .admin-stat-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .admin-section { background: var(--card-bg, #1a1a2e); border: 1px solid var(--border, rgba(255,255,255,0.08)); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .admin-section h2 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .admin-table th { text-align: left; padding: 0.6rem 0.75rem; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--border, rgba(255,255,255,0.08)); }
+    .admin-table td { padding: 0.75rem; border-bottom: 1px solid var(--border, rgba(255,255,255,0.05)); vertical-align: middle; }
+    .admin-table tr:last-child td { border-bottom: none; }
+    .type-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .type-athlete { background: rgba(59,130,246,0.15); color: #60a5fa; }
+    .type-scout   { background: rgba(168,85,247,0.15); color: #c084fc; }
+    .type-coach   { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .type-parent  { background: rgba(251,146,60,0.15); color: #fb923c; }
+    .type-admin   { background: rgba(239,68,68,0.15); color: #f87171; }
+    .admin-type-select { background: transparent; border: 1px solid var(--border, rgba(255,255,255,0.12)); border-radius: 6px; color: inherit; padding: 0.25rem 0.5rem; font-size: 0.8rem; cursor: pointer; }
+    .admin-type-select:focus { outline: none; border-color: var(--primary); }
+    .btn-xs { padding: 0.2rem 0.6rem; font-size: 0.75rem; border-radius: 6px; }
+    .admin-empty { color: var(--text-muted); text-align: center; padding: 2rem; font-size: 0.9rem; }
+    .admin-badge-admin { font-size: 0.6rem; background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.3); padding: 0.1rem 0.4rem; border-radius: 4px; margin-left: 0.4rem; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.05em; }
+  </style>
+</head>
+<body data-page="admin">
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav class="nav">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">AthletePro</span>
+            <span class="logo-tagline">Recruit • Connect • Succeed</span>
+          </div>
+        </a>
+        <div class="nav-links">
+          <a href="dashboard.html" class="nav-link">Dashboard</a>
+          <div id="navUserDisplay" class="auth-logged-in"></div>
+          <a href="login.html" class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="admin-page">
+    <div class="container">
+      <div class="admin-header">
+        <h1>Admin Panel</h1>
+        <p>Manage accounts, profiles, and site data</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="admin-stats" id="adminStats">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Accounts Table -->
+      <div class="admin-section">
+        <h2>&#128101; All Accounts</h2>
+        <div id="accountsTableWrap">
+          <p class="admin-empty">Loading...</p>
+        </div>
+      </div>
+
+      <!-- Athletes Table -->
+      <div class="admin-section">
+        <h2>&#127939; All Athlete Profiles</h2>
+        <div id="athletesTableWrap">
+          <p class="admin-empty">Loading...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    function initAdminPage() {
+      if (!isLoggedIn()) {
+        window.location.href = 'login.html';
+        return;
+      }
+      if (!isAdmin()) {
+        showToast('Access denied — admin only', 'error');
+        setTimeout(() => window.location.href = 'index.html', 1500);
+        return;
+      }
+
+      renderAdminStats();
+      renderAccountsTable();
+      renderAthletesTable();
+    }
+
+    function renderAdminStats() {
+      const accounts = getAccounts();
+      const athletes = getAthletes();
+      const adminStatsEl = document.getElementById('adminStats');
+
+      const typeCount = {};
+      accounts.forEach(a => { typeCount[a.accountType] = (typeCount[a.accountType] || 0) + 1; });
+
+      adminStatsEl.innerHTML = `
+        <div class="admin-stat-card">
+          <span class="admin-stat-value">${accounts.length}</span>
+          <span class="admin-stat-label">Total Accounts</span>
+        </div>
+        <div class="admin-stat-card">
+          <span class="admin-stat-value">${athletes.length}</span>
+          <span class="admin-stat-label">Athlete Profiles</span>
+        </div>
+        <div class="admin-stat-card">
+          <span class="admin-stat-value">${typeCount.athlete || 0}</span>
+          <span class="admin-stat-label">Athletes</span>
+        </div>
+        <div class="admin-stat-card">
+          <span class="admin-stat-value">${(typeCount.scout || 0) + (typeCount.coach || 0)}</span>
+          <span class="admin-stat-label">Scouts / Coaches</span>
+        </div>
+      `;
+    }
+
+    function renderAccountsTable() {
+      const accounts = getAccounts();
+      const wrap = document.getElementById('accountsTableWrap');
+
+      if (!accounts.length) {
+        wrap.innerHTML = '<p class="admin-empty">No accounts yet.</p>';
+        return;
+      }
+
+      const rows = accounts.map(a => {
+        const typeBadge = `<span class="type-badge type-${a.accountType}">${a.accountType}</span>`;
+        const adminBadge = (a.isAdmin || ADMIN_EMAILS.includes(a.email)) ? '<span class="admin-badge-admin">admin</span>' : '';
+        const joinedDate = a.createdAt ? new Date(a.createdAt).toLocaleDateString() : '—';
+        return `
+          <tr>
+            <td><strong>${escapeHtml(a.name)}</strong>${adminBadge}</td>
+            <td>${escapeHtml(a.email)}</td>
+            <td>
+              <select class="admin-type-select" onchange="adminChangeType('${a.id}', this.value)">
+                <option value="athlete"  ${a.accountType === 'athlete'  ? 'selected' : ''}>Athlete</option>
+                <option value="scout"    ${a.accountType === 'scout'    ? 'selected' : ''}>Scout</option>
+                <option value="coach"    ${a.accountType === 'coach'    ? 'selected' : ''}>Coach</option>
+                <option value="parent"   ${a.accountType === 'parent'   ? 'selected' : ''}>Parent</option>
+              </select>
+            </td>
+            <td>${a.profiles ? a.profiles.length : 0}</td>
+            <td>${joinedDate}</td>
+            <td>
+              <button class="btn btn-xs btn-danger" onclick="adminDeleteAccount('${a.id}', '${escapeHtml(a.name)}')">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      wrap.innerHTML = `
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Account Type</th>
+              <th>Profiles</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function renderAthletesTable() {
+      const athletes = getAthletes();
+      const wrap = document.getElementById('athletesTableWrap');
+
+      if (!athletes.length) {
+        wrap.innerHTML = '<p class="admin-empty">No athlete profiles yet.</p>';
+        return;
+      }
+
+      const rows = athletes.map(a => {
+        const owner = a.accountId ? (getAccountById(a.accountId)?.email || '—') : '—';
+        const created = a.createdAt ? new Date(a.createdAt).toLocaleDateString() : '—';
+        return `
+          <tr>
+            <td><a href="profile.html?id=${a.id}" style="color:var(--primary)">${escapeHtml(a.name || '(unnamed)')}</a></td>
+            <td>${escapeHtml(a.sport || '—')}</td>
+            <td>${escapeHtml(a.gradYear || '—')}</td>
+            <td>${escapeHtml(owner)}</td>
+            <td>${created}</td>
+            <td>
+              <button class="btn btn-xs btn-danger" onclick="adminDeleteProfile('${a.id}', '${escapeHtml(a.name || 'this profile')}')">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      wrap.innerHTML = `
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Athlete Name</th>
+              <th>Sport</th>
+              <th>Grad Year</th>
+              <th>Account</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function adminChangeType(accountId, newType) {
+      updateAccount(accountId, { accountType: newType });
+      showToast('Account type updated', 'success');
+      renderAdminStats();
+    }
+
+    function adminDeleteAccount(accountId, name) {
+      if (!confirm(`Delete account "${name}"? This cannot be undone.`)) return;
+      const accounts = getAccounts().filter(a => a.id !== accountId);
+      localStorage.setItem('athletehub_accounts', JSON.stringify(accounts));
+      showToast('Account deleted', 'success');
+      renderAdminStats();
+      renderAccountsTable();
+    }
+
+    function adminDeleteProfile(profileId, name) {
+      if (!confirm(`Delete profile "${name}"? This cannot be undone.`)) return;
+      deleteAthlete(profileId);
+      showToast('Profile deleted', 'success');
+      renderAdminStats();
+      renderAthletesTable();
+    }
+
+    // Run on page load (app.js DOMContentLoaded calls page router, but admin isn't in the router yet)
+    document.addEventListener('DOMContentLoaded', initAdminPage);
+  </script>
+</body>
+</html>
