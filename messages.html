@@ -5,10 +5,193 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Messages - AthletePro</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── Layout ─────────────────────────────────────────── */
+    .msg-page { display:flex; flex-direction:column; height:100vh; }
+    .msg-body  { display:flex; flex:1; overflow:hidden; }
+
+    /* ── Sidebar ─────────────────────────────────────────── */
+    .msg-sidebar {
+      width: 300px; min-width:280px; display:flex; flex-direction:column;
+      border-right:1px solid var(--border-light); background:var(--bg-card);
+    }
+    .msg-sidebar-head {
+      padding:1rem 1.1rem 0.75rem; display:flex; align-items:center;
+      justify-content:space-between; border-bottom:1px solid var(--border-light);
+    }
+    .msg-sidebar-head h2 { font-size:1.05rem; margin:0; }
+    .msg-new-btn {
+      background:var(--primary); color:#fff; border:none; border-radius:20px;
+      padding:0.3rem 0.85rem; font-size:0.8rem; font-weight:700; cursor:pointer;
+    }
+    .msg-search {
+      padding:0.6rem 0.9rem; border-bottom:1px solid var(--border-light);
+    }
+    .msg-search input {
+      width:100%; background:var(--bg-dark,#111827); border:1px solid var(--border-light);
+      border-radius:20px; padding:0.4rem 0.85rem; color:var(--text-primary); font-size:0.85rem;
+    }
+    .msg-search input:focus { outline:none; border-color:var(--primary); }
+    .conv-list { flex:1; overflow-y:auto; }
+    .conv-item {
+      display:flex; align-items:center; gap:0.75rem;
+      padding:0.85rem 1rem; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.04);
+      transition:background 0.12s;
+    }
+    .conv-item:hover { background:rgba(255,255,255,0.04); }
+    .conv-item.active { background:rgba(59,130,246,0.12); }
+    .conv-item.unread .conv-name { font-weight:800; }
+    .conv-avatar {
+      width:42px; height:42px; border-radius:50%; background:var(--primary);
+      display:flex; align-items:center; justify-content:center; font-weight:800;
+      font-size:1rem; color:#fff; flex-shrink:0; overflow:hidden;
+    }
+    .conv-avatar img { width:100%; height:100%; object-fit:cover; }
+    .conv-avatar.group { background:linear-gradient(135deg,var(--primary),#a855f7); font-size:0.75rem; }
+    .conv-info { flex:1; min-width:0; }
+    .conv-row1 { display:flex; align-items:center; justify-content:space-between; gap:0.4rem; }
+    .conv-name { font-size:0.875rem; font-weight:700; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .conv-time { font-size:0.7rem; color:var(--text-muted); flex-shrink:0; }
+    .conv-preview { font-size:0.78rem; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:0.1rem; }
+    .conv-badges { display:flex; align-items:center; gap:0.4rem; margin-top:0.2rem; flex-wrap:wrap; }
+    .conv-type-badge {
+      font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;
+      padding:0.15rem 0.5rem; border-radius:10px; background:rgba(255,255,255,0.08); color:var(--text-muted);
+    }
+    .conv-type-badge.scout-badge { background:rgba(168,85,247,0.18); color:#c084fc; }
+    .conv-unread-dot {
+      width:8px; height:8px; border-radius:50%; background:var(--primary); flex-shrink:0;
+    }
+    .conv-empty {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      height:100%; padding:2rem 1rem; text-align:center; color:var(--text-muted);
+    }
+    .conv-empty-icon { font-size:2.5rem; margin-bottom:0.75rem; }
+    .conv-empty h3 { font-size:0.95rem; margin-bottom:0.5rem; color:var(--text-secondary); }
+    .conv-empty p { font-size:0.82rem; margin-bottom:1rem; }
+
+    /* ── Thread ──────────────────────────────────────────── */
+    .msg-thread { flex:1; display:flex; flex-direction:column; min-width:0; }
+    .thread-head {
+      padding:0.875rem 1.25rem; border-bottom:1px solid var(--border-light);
+      display:flex; align-items:center; justify-content:space-between;
+      background:var(--bg-card); min-height:64px;
+    }
+    .thread-head-left { display:flex; align-items:center; gap:0.75rem; }
+    .thread-head-avatar {
+      width:38px; height:38px; border-radius:50%; background:var(--primary);
+      display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff;
+      overflow:hidden; flex-shrink:0;
+    }
+    .thread-head-avatar img { width:100%; height:100%; object-fit:cover; }
+    .thread-head-name { font-size:0.95rem; font-weight:700; color:var(--text-primary); }
+    .thread-head-sub { font-size:0.73rem; color:var(--text-muted); margin-top:0.1rem; }
+    .thread-head-actions { display:flex; gap:0.5rem; align-items:center; }
+    .thread-msgs {
+      flex:1; overflow-y:auto; padding:1.25rem 1.5rem; display:flex; flex-direction:column; gap:0.5rem;
+    }
+    .thread-empty {
+      flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      color:var(--text-muted); text-align:center; padding:2rem;
+    }
+    .thread-empty-icon { font-size:3rem; margin-bottom:1rem; }
+    .thread-empty h3 { font-size:1rem; color:var(--text-secondary); margin-bottom:0.5rem; }
+    .msg-bubble {
+      max-width:68%; padding:0.65rem 1rem; border-radius:18px;
+      display:flex; flex-direction:column; gap:0.2rem;
+    }
+    .msg-bubble.sent {
+      align-self:flex-end; background:var(--primary); color:#fff; border-bottom-right-radius:4px;
+    }
+    .msg-bubble.recv {
+      align-self:flex-start; background:var(--bg-card); border:1px solid var(--border-light); border-bottom-left-radius:4px;
+    }
+    .msg-bubble-text { font-size:0.915rem; line-height:1.5; word-wrap:break-word; }
+    .msg-bubble-time { font-size:0.67rem; opacity:0.55; align-self:flex-end; }
+    .msg-sender-label { font-size:0.68rem; font-weight:700; color:var(--secondary); padding-left:2px; align-self:flex-start; }
+
+    /* ── Compose ─────────────────────────────────────────── */
+    .compose-wrap {
+      border-top:1px solid var(--border-light); background:var(--bg-card); padding:0.75rem 1.1rem;
+    }
+    .tpl-row {
+      display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.6rem;
+    }
+    .tpl-lbl { font-size:0.68rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.07em; white-space:nowrap; }
+    .tpl-chip {
+      background:transparent; border:1px solid rgba(255,255,255,0.12); border-radius:14px;
+      color:var(--text-secondary); padding:0.22rem 0.65rem; font-size:0.76rem; cursor:pointer;
+      font-family:inherit; transition:all 0.12s;
+    }
+    .tpl-chip:hover { border-color:var(--primary); color:var(--primary); }
+    .compose-row { display:flex; gap:0.65rem; align-items:flex-end; }
+    .compose-row textarea {
+      flex:1; background:var(--bg-dark,#111827); border:1.5px solid var(--border-medium);
+      border-radius:22px; padding:0.65rem 1rem; color:var(--text-primary); font-size:0.915rem;
+      font-family:inherit; resize:none; height:44px; max-height:150px; line-height:1.45;
+      transition:border-color 0.15s;
+    }
+    .compose-row textarea:focus { outline:none; border-color:var(--primary); }
+    .compose-row textarea::placeholder { color:var(--text-muted); }
+    .send-btn-new {
+      background:var(--primary); color:#fff; border:none; border-radius:50%;
+      width:42px; height:42px; display:flex; align-items:center; justify-content:center;
+      cursor:pointer; flex-shrink:0; font-size:1.1rem; transition:background 0.15s;
+    }
+    .send-btn-new:hover { background:var(--primary-dark,#1d4ed8); }
+
+    /* ── No thread selected ──────────────────────────────── */
+    .no-thread {
+      flex:1; display:flex; align-items:center; justify-content:center; flex-direction:column;
+      color:var(--text-muted); text-align:center; padding:2rem;
+    }
+    .no-thread-icon { font-size:3.5rem; margin-bottom:1.25rem; opacity:0.5; }
+    .no-thread h3 { color:var(--text-secondary); font-size:1.05rem; margin-bottom:0.5rem; }
+    .no-thread p { font-size:0.85rem; }
+
+    /* ── Mobile ──────────────────────────────────────────── */
+    @media (max-width: 700px) {
+      .msg-sidebar { width:100%; min-width:unset; position:absolute; left:0; right:0; top:56px; bottom:0; z-index:10; }
+      .msg-thread { position:absolute; left:0; right:0; top:56px; bottom:0; transform:translateX(100%); transition:transform 0.22s ease; z-index:20; }
+      .msg-thread.open { transform:translateX(0); }
+      .back-to-list { display:flex !important; }
+    }
+    .back-to-list { display:none; background:none; border:none; color:var(--primary); font-size:1.3rem; cursor:pointer; padding:0 0.4rem; }
+
+    /* ── New Conversation Modal ───────────────────────────── */
+    .nc-modal-body { padding:1rem 1.25rem 1.25rem; }
+    .nc-tabs { display:flex; border-bottom:1px solid var(--border-light); }
+    .nc-tab {
+      flex:1; padding:0.7rem; text-align:center; font-size:0.82rem; font-weight:700;
+      cursor:pointer; color:var(--text-muted); border:none; background:none; transition:color 0.15s;
+      letter-spacing:0.02em;
+    }
+    .nc-tab.active { color:var(--primary); box-shadow:inset 0 -2px 0 var(--primary); }
+    .nc-section { display:none; }
+    .nc-section.active { display:block; }
+    .nc-hint { font-size:0.78rem; color:var(--text-muted); padding:0.3rem 0; margin-bottom:0.6rem; }
+    .nc-results { max-height:280px; overflow-y:auto; }
+    .nc-user-row {
+      display:flex; align-items:center; gap:0.75rem; padding:0.65rem 0.5rem;
+      border-radius:10px; cursor:pointer; transition:background 0.12s;
+    }
+    .nc-user-row:hover { background:rgba(255,255,255,0.05); }
+    .nc-avatar {
+      width:38px; height:38px; border-radius:50%; background:var(--primary);
+      display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; flex-shrink:0;
+    }
+    .nc-name { font-size:0.875rem; font-weight:700; color:var(--text-primary); }
+    .nc-sub  { font-size:0.75rem; color:var(--text-muted); }
+    .nc-action { margin-left:auto; color:var(--primary); font-size:1rem; }
+    .chip-list { display:flex; flex-wrap:wrap; gap:0.4rem; margin-bottom:0.6rem; min-height:28px; }
+    .member-chip { background:rgba(59,130,246,0.15); color:var(--primary); border-radius:20px; padding:0.25rem 0.65rem; font-size:0.78rem; display:flex; align-items:center; gap:0.3rem; }
+    .member-chip button { background:none; border:none; cursor:pointer; color:inherit; font-size:0.9rem; padding:0; }
+  </style>
 </head>
 <body data-page="messages">
+
   <!-- Header -->
-  <header class="header">
+  <header class="header" style="position:relative;z-index:30;">
     <div class="container">
       <nav class="nav">
         <a href="index.html" class="logo">
@@ -24,129 +207,523 @@
           </div>
         </a>
         <div class="nav-links">
-          <a href="reels.html" class="nav-link">Reels</a>
-          <a href="feed.html" class="nav-link">Feed</a>
-          <a href="gameday.html" class="nav-link">Game Day</a>
-          <a href="index.html#browse" class="nav-link">Discover</a>
+          <a href="index.html#browse" class="nav-link">Browse</a>
           <div id="navUserDisplay" class="auth-logged-in"></div>
-          <a href="login.html" class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
-          <a href="signup.html" class="btn btn-primary auth-logged-out">Sign Up</a>
+          <a href="login.html"  class="btn btn-secondary btn-sm auth-logged-out">Log In</a>
+          <a href="signup.html" class="btn btn-primary       auth-logged-out">Sign Up</a>
         </div>
       </nav>
     </div>
   </header>
 
-  <!-- Messages Container -->
-  <main class="messages-container">
-    <div class="container">
-      <div class="messages-layout">
+  <div class="msg-page" style="height:calc(100vh - 56px);">
+    <div class="msg-body">
 
-        <!-- Conversations Sidebar -->
-        <aside class="messages-sidebar">
-          <div class="messages-sidebar-header">
-            <h2>Messages</h2>
-            <button class="new-chat-btn" onclick="showNewConversationModal()">+ New</button>
-          </div>
-          <div class="messages-search">
-            <input type="text" id="messageSearchInput" placeholder="Search conversations..."
-              class="search-input">
-          </div>
-          <div id="conversationsList" class="conversations-list">
-            <!-- Rendered by JS -->
-          </div>
-        </aside>
+      <!-- ── Sidebar ── -->
+      <aside class="msg-sidebar" id="msgSidebar">
+        <div class="msg-sidebar-head">
+          <h2>Messages</h2>
+          <button class="msg-new-btn" onclick="openNewConvModal()">+ New</button>
+        </div>
+        <div class="msg-search">
+          <input type="text" id="msgSearchInput" placeholder="Search conversations…" oninput="filterConvs(this.value)">
+        </div>
+        <div class="conv-list" id="convList"></div>
+      </aside>
 
-        <!-- Message Thread -->
-        <section class="messages-thread">
-          <div id="threadHeader" class="thread-header">
-            <div class="empty-thread-header" style="flex:1;">
-              <div class="empty-icon">💬</div>
-              <h3>Select a conversation</h3>
-            </div>
+      <!-- ── Thread ── -->
+      <section class="msg-thread" id="msgThread">
+        <div class="thread-head" id="threadHead">
+          <div class="no-thread" style="flex:1;flex-direction:row;gap:0.5rem;justify-content:flex-start;padding:0;">
+            <button class="back-to-list" onclick="closeThread()">←</button>
+            <span style="color:var(--text-muted);font-size:0.9rem;">Select a conversation</span>
           </div>
-          <div id="messageThread" class="message-thread-content">
-            <div class="empty-thread-content">
-              <div class="empty-icon">✉️</div>
-              <h3>Your messages</h3>
-              <p>Select a conversation or start a new one.</p>
-            </div>
+        </div>
+        <div id="threadMsgs" class="thread-msgs">
+          <div class="thread-empty">
+            <div class="thread-empty-icon">✉️</div>
+            <h3>Your messages</h3>
+            <p>Select a conversation or start a new one.</p>
           </div>
-          <div id="composeArea" class="compose-area hidden">
-            <div class="compose-input-container">
-              <textarea
-                id="messageInput"
-                placeholder="Type a message…"
-                rows="1"
-                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessageHandler();}"
-              ></textarea>
-              <button class="btn btn-primary send-btn" onclick="sendMessageHandler()">Send</button>
-            </div>
+        </div>
+        <div class="compose-wrap" id="composeWrap" style="display:none;">
+          <div class="tpl-row" id="tplRow" style="display:none;"></div>
+          <div class="compose-row">
+            <textarea id="msgInput" placeholder="Type a message…" rows="1"
+              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doSend();}"></textarea>
+            <button class="send-btn-new" onclick="doSend()" title="Send">➤</button>
           </div>
-        </section>
+        </div>
+      </section>
 
-      </div>
     </div>
-  </main>
+  </div>
 
-  <!-- New Conversation Modal -->
-  <div id="newConversationModal" class="modal-overlay hidden">
-    <div class="modal" style="max-width:480px;">
+  <!-- ── New Conversation Modal ── -->
+  <div id="ncModal" class="modal-overlay hidden" onclick="if(event.target===this)closeNewConvModal()">
+    <div class="modal" style="max-width:480px;max-height:80vh;display:flex;flex-direction:column;">
       <div class="modal-header">
-        <h3 style="font-size:1.05rem;">New Conversation</h3>
-        <button class="modal-close" onclick="hideNewConversationModal()">×</button>
+        <h3 style="font-size:1rem;">New Conversation</h3>
+        <button class="modal-close" onclick="closeNewConvModal()">×</button>
+      </div>
+      <div class="nc-tabs">
+        <button class="nc-tab active" id="ncTabDm"    onclick="switchNcTab('dm')">Direct Message</button>
+        <button class="nc-tab"        id="ncTabGroup" onclick="switchNcTab('group')">Group Chat</button>
       </div>
 
-      <!-- Tab bar -->
-      <div style="display:flex;border-bottom:1px solid var(--border-light);">
-        <button id="dmTabBtn" class="modal-tab-btn active" onclick="switchConversationTab('dm')">
-          Direct Message
-        </button>
-        <button id="groupTabBtn" class="modal-tab-btn" onclick="switchConversationTab('group')">
-          Group Chat
-        </button>
+      <!-- DM tab -->
+      <div id="ncDm" class="nc-modal-body nc-section active" style="overflow-y:auto;">
+        <!-- Scout quick-contacts injected here by JS -->
+        <div id="ncScoutQuick" style="display:none;">
+          <p class="nc-hint" style="margin-bottom:0.4rem;">Athletes you can recruit</p>
+          <div id="ncAthleteList" class="nc-results"></div>
+          <div style="border-top:1px solid var(--border-light);margin:0.75rem 0;"></div>
+        </div>
+        <div class="form-group" style="margin-bottom:0.6rem;">
+          <input type="text" id="ncSearchInput" class="form-control" placeholder="Search by name or email…" oninput="ncSearch(this.value)">
+        </div>
+        <div id="ncSearchResults" class="nc-results">
+          <p class="nc-hint">Type to search all users</p>
+        </div>
       </div>
 
-      <!-- DM Tab -->
-      <div id="dmTabContent" class="modal-body">
+      <!-- Group tab -->
+      <div id="ncGroup" class="nc-modal-body nc-section" style="overflow-y:auto;">
         <div class="form-group" style="margin-bottom:0.75rem;">
-          <label style="display:block;margin-bottom:0.4rem;color:var(--text-secondary);font-size:0.82rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">Search users</label>
-          <input type="text" id="userSearchInput" class="form-control"
-            placeholder="Name or email…" oninput="searchUsersForConversation()">
+          <label style="font-size:0.78rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.07em;display:block;margin-bottom:0.35rem;">Group Name</label>
+          <input type="text" id="ncGroupName" class="form-control" placeholder="e.g. Offensive Line, Team Coaches…">
         </div>
-        <div id="userSearchResults" class="user-search-results">
-          <p class="search-hint">Type at least 2 characters to search</p>
+        <label style="font-size:0.78rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.07em;display:block;margin-bottom:0.35rem;">Members</label>
+        <div class="chip-list" id="ncMemberChips"><span style="color:var(--text-muted);font-size:0.8rem;">No members yet</span></div>
+        <div class="form-group" style="margin-bottom:0.5rem;">
+          <input type="text" id="ncGroupSearch" class="form-control" placeholder="Add members…" oninput="ncGroupSearch(this.value)">
         </div>
-      </div>
-
-      <!-- Group Tab -->
-      <div id="groupTabContent" class="modal-body hidden">
-        <div class="form-group" style="margin-bottom:1rem;">
-          <label style="display:block;margin-bottom:0.4rem;color:var(--text-secondary);font-size:0.82rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">Group name</label>
-          <input type="text" id="groupNameInput" class="form-control"
-            placeholder="e.g. Offensive Line, Team Coaches…">
-        </div>
-
-        <div style="margin-bottom:0.5rem;">
-          <label style="display:block;margin-bottom:0.4rem;color:var(--text-secondary);font-size:0.82rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">Members</label>
-          <div id="selectedMembersList" class="selected-members-list">
-            <span style="color:var(--text-muted);font-size:0.82rem;">No members added yet</span>
-          </div>
-        </div>
-
-        <div class="form-group" style="margin-bottom:0.75rem;">
-          <input type="text" id="groupUserSearchInput" class="form-control"
-            placeholder="Search to add members…" oninput="searchUsersForGroupAdd()">
-        </div>
-        <div id="groupUserSearchResults" class="user-search-results"></div>
-
-        <button class="btn btn-primary" style="width:100%;margin-top:1rem;"
-          onclick="createGroupConversationHandler()">
-          Create Group Chat
-        </button>
+        <div id="ncGroupResults" class="nc-results"></div>
+        <button class="btn btn-primary" style="width:100%;margin-top:1rem;" onclick="createGroupConv()">Create Group Chat</button>
       </div>
     </div>
   </div>
 
   <script src="app.js"></script>
+  <script type="module">
+    import { listenToConversation, stopListening, sendMessageFS } from './firebase-messaging.js';
+
+    // ── State ──────────────────────────────────────────────────────────────
+    let activeConvId    = null;
+    let ncGroupMembers  = [];
+
+    // ── Boot ───────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!isLoggedIn()) { window.location.href = 'login.html'; return; }
+      updateAuthUI();
+      renderConvList();
+
+      // Auto-resize textarea
+      const ta = document.getElementById('msgInput');
+      ta?.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+      });
+
+      // Open conversation from URL param
+      const conv = new URLSearchParams(location.search).get('conv');
+      const intro = new URLSearchParams(location.search).get('intro');
+      if (conv) openConv(conv, intro === '1');
+    });
+
+    // ── Render conversation list ───────────────────────────────────────────
+    function renderConvList(filter = '') {
+      const account = getCurrentAccount();
+      const list    = document.getElementById('convList');
+      let convs     = getConversationsForUser(account.id);
+      if (filter) {
+        const f = filter.toLowerCase();
+        convs = convs.filter(c => {
+          if (c.isGroup) return c.groupName?.toLowerCase().includes(f);
+          const other = getAccountById(c.participants.find(p => p !== account.id));
+          return other?.name?.toLowerCase().includes(f) || other?.email?.toLowerCase().includes(f);
+        });
+      }
+
+      if (!convs.length) {
+        list.innerHTML = `
+          <div class="conv-empty">
+            <div class="conv-empty-icon">💬</div>
+            <h3>${filter ? 'No matches' : 'No messages yet'}</h3>
+            <p>${filter ? 'Try a different search.' : 'Start a conversation with athletes, coaches, or scouts.'}</p>
+            ${!filter ? '<button class="btn btn-primary btn-sm" onclick="openNewConvModal()">New Conversation</button>' : ''}
+          </div>`;
+        return;
+      }
+
+      list.innerHTML = convs.map(c => {
+        const unread  = c.unreadCount?.[account.id] || 0;
+        let avatar, name, sub, badge = '';
+
+        if (c.isGroup) {
+          avatar = `<div class="conv-avatar group">GRP</div>`;
+          name   = escapeHtml(c.groupName || 'Group Chat');
+          sub    = `${c.participants.length} members`;
+        } else {
+          const otherId  = c.participants.find(p => p !== account.id);
+          const other    = getAccountById(otherId);
+          const initials = (other?.name || 'U')[0].toUpperCase();
+          avatar = other?.photo
+            ? `<div class="conv-avatar"><img src="${other.photo}" alt="${initials}"></div>`
+            : `<div class="conv-avatar">${initials}</div>`;
+          name   = escapeHtml(other?.name || 'Unknown');
+          const isRecruiter = ['scout','coach'].includes(other?.accountType) && account.accountType === 'athlete';
+          badge  = other ? `<span class="conv-type-badge${isRecruiter ? ' scout-badge' : ''}">${isRecruiter ? '🔵 ' : ''}${ACCOUNT_TYPES[other.accountType]?.name || other.accountType}</span>` : '';
+          sub    = '';
+        }
+
+        const preview  = c.lastMessage ? escapeHtml(c.lastMessage.content.substring(0, 52)) + (c.lastMessage.content.length > 52 ? '…' : '') : 'No messages yet';
+        const timeStr  = formatTimeAgo(c.lastMessageAt);
+
+        return `
+          <div class="conv-item${activeConvId === c.id ? ' active' : ''}${unread ? ' unread' : ''}" onclick="openConv('${c.id}')">
+            ${avatar}
+            <div class="conv-info">
+              <div class="conv-row1">
+                <span class="conv-name">${name}</span>
+                <span class="conv-time">${timeStr}</span>
+              </div>
+              <div class="conv-preview">${preview}</div>
+              <div class="conv-badges">${badge}${unread ? `<div class="conv-unread-dot"></div>` : ''}</div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+    window.filterConvs = (v) => renderConvList(v);
+
+    // ── Open a conversation ────────────────────────────────────────────────
+    function openConv(convId, showIntro = false) {
+      activeConvId = convId;
+      const account = getCurrentAccount();
+      markConversationAsRead(convId, account.id);
+      renderConvList();
+      renderThread(convId, showIntro);
+      document.getElementById('msgThread').classList.add('open'); // mobile
+    }
+    window.openConv = openConv;
+
+    function closeThread() {
+      document.getElementById('msgThread').classList.remove('open');
+      activeConvId = null;
+      stopListening();
+    }
+    window.closeThread = closeThread;
+
+    // ── Render thread ──────────────────────────────────────────────────────
+    function renderThread(convId, showIntro = false) {
+      const account  = getCurrentAccount();
+      const conv     = getConversationById(convId);
+      if (!conv) return;
+
+      // ── Header ──
+      let avatarHtml, nameHtml, subHtml, profileLink = '';
+      if (conv.isGroup) {
+        avatarHtml = `<div class="thread-head-avatar">GRP</div>`;
+        nameHtml   = escapeHtml(conv.groupName || 'Group Chat');
+        subHtml    = `${conv.participants.length} members`;
+      } else {
+        const otherId = conv.participants.find(p => p !== account.id);
+        const other   = getAccountById(otherId);
+        const init    = (other?.name || 'U')[0].toUpperCase();
+        avatarHtml    = other?.photo
+          ? `<div class="thread-head-avatar"><img src="${other.photo}" alt="${init}"></div>`
+          : `<div class="thread-head-avatar">${init}</div>`;
+        nameHtml      = escapeHtml(other?.name || 'Unknown');
+        subHtml       = ACCOUNT_TYPES[other?.accountType]?.name || '';
+        // Profile link if they have athlete profiles
+        const ap = getAthletes().filter(a => a.accountId === otherId);
+        if (ap.length) profileLink = `<a href="profile.html?id=${ap[0].id}" class="btn btn-sm btn-outline" style="font-size:0.74rem;">View Profile</a>`;
+      }
+
+      document.getElementById('threadHead').innerHTML = `
+        <div class="thread-head-left">
+          <button class="back-to-list" onclick="closeThread()">←</button>
+          ${avatarHtml}
+          <div>
+            <div class="thread-head-name">${nameHtml}</div>
+            ${subHtml ? `<div class="thread-head-sub">${subHtml}</div>` : ''}
+          </div>
+        </div>
+        <div class="thread-head-actions">
+          ${profileLink}
+          <button class="btn btn-sm btn-secondary" onclick="deleteConv('${convId}')">Delete</button>
+        </div>`;
+
+      // ── Messages ──
+      renderMessages(convId);
+
+      // ── Compose ──
+      const wrap = document.getElementById('composeWrap');
+      wrap.style.display = '';
+
+      // Templates
+      buildTemplateRow(conv, account);
+
+      // Show intro template if coming from quick-message
+      if (showIntro) {
+        const ta = document.getElementById('msgInput');
+        if (ta && !ta.value) {
+          ta.value = `Hi! I came across your profile and I'm very impressed. I'd love to tell you more about our program and discuss whether it could be a great fit for you. When would you have a few minutes to connect?`;
+          ta.style.height = 'auto';
+          ta.style.height = Math.min(ta.scrollHeight, 150) + 'px';
+          ta.focus();
+        }
+      }
+
+      // ── Real-time listener via Firestore ──
+      listenToConversation(convId, () => renderMessages(convId));
+    }
+
+    function renderMessages(convId) {
+      const account  = getCurrentAccount();
+      const msgs     = getMessagesForConversation(convId);
+      const conv     = getConversationById(convId);
+      const container = document.getElementById('threadMsgs');
+
+      if (!msgs.length) {
+        container.innerHTML = `
+          <div class="thread-empty">
+            <div class="thread-empty-icon">💬</div>
+            <h3>Start the conversation</h3>
+            <p>Say hello or use a quick template below.</p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = msgs.map(m => {
+        const sent = m.senderId === account.id;
+        let senderLabel = '';
+        if (conv?.isGroup && !sent) {
+          const s = getAccountById(m.senderId);
+          senderLabel = `<div class="msg-sender-label">${escapeHtml(s?.name || 'Unknown')}</div>`;
+        }
+        return `
+          ${senderLabel}
+          <div class="msg-bubble ${sent ? 'sent' : 'recv'}">
+            <span class="msg-bubble-text">${escapeHtml(m.content)}</span>
+            <span class="msg-bubble-time">${formatTimeAgo(m.createdAt)}</span>
+          </div>`;
+      }).join('');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // ── Build template buttons ─────────────────────────────────────────────
+    function buildTemplateRow(conv, account) {
+      const row = document.getElementById('tplRow');
+      row.style.display = 'none';
+      row.innerHTML = '';
+      if (conv.isGroup) return;
+
+      const otherId     = conv.participants.find(p => p !== account.id);
+      const other       = getAccountById(otherId);
+      const iAmScout    = canUserScout();
+      const otherAthlete = other?.accountType === 'athlete';
+      const iAmAthlete  = account.accountType === 'athlete';
+      const otherScout  = ['scout','coach'].includes(other?.accountType);
+
+      let chips = [];
+      if (iAmScout && otherAthlete) {
+        chips = [
+          { label:'👋 Intro',    type:'scout_intro' },
+          { label:'⭐ Interest', type:'scout_interest' },
+          { label:'📅 Visit',    type:'scout_visit' },
+        ];
+      } else if (iAmAthlete && otherScout) {
+        chips = [
+          { label:'🙏 Thanks',     type:'ath_thanks' },
+          { label:'✅ Interested', type:'ath_interested' },
+          { label:'📄 My Stats',   type:'ath_info' },
+        ];
+      }
+
+      if (!chips.length) return;
+      row.style.display = 'flex';
+      row.innerHTML = `<span class="tpl-lbl">Quick:</span>` +
+        chips.map(c => `<button class="tpl-chip" onclick="applyTemplate('${c.type}')">${c.label}</button>`).join('');
+    }
+
+    window.applyTemplate = (type) => {
+      const ta  = document.getElementById('msgInput');
+      const acc = getCurrentAccount();
+      const templates = {
+        scout_intro:    `Hi, I'm ${acc?.name}! I came across your profile and I'm really impressed by your ${'' }stats and highlights. I'd love to tell you more about our program. Do you have a few minutes to connect?`,
+        scout_interest: `I've been reviewing your profile and I'm genuinely interested in you as a potential recruit. Are you currently exploring college options? I'd love to start a conversation.`,
+        scout_visit:    `We'd love to have you visit our campus! It's a great chance to see our facilities and meet the staff. Would you be available for a visit? Let me know a few dates that work.`,
+        ath_thanks:     `Thank you so much for reaching out! I really appreciate the interest and I'm excited to learn more about your program.`,
+        ath_interested: `I'm very interested in your program! I'd love to schedule a call to talk more. What times work best for you?`,
+        ath_info:       `I'd be happy to share more about myself! My full stats and highlight videos are on my AthletePro profile. Feel free to check it out and let me know if you have any questions.`,
+      };
+      if (ta) {
+        ta.value = templates[type] || '';
+        ta.style.height = 'auto';
+        ta.style.height = Math.min(ta.scrollHeight, 150) + 'px';
+        ta.focus();
+      }
+    };
+
+    // ── Send ───────────────────────────────────────────────────────────────
+    async function doSend() {
+      if (!activeConvId) return;
+      const ta = document.getElementById('msgInput');
+      const content = ta?.value.trim();
+      if (!content) return;
+
+      const account = getCurrentAccount();
+      ta.value = '';
+      ta.style.height = '44px';
+
+      // Use Firebase-backed send (also writes to localStorage)
+      await sendMessageFS(activeConvId, account.id, content);
+
+      renderMessages(activeConvId);
+      renderConvList();
+    }
+    window.doSend = doSend;
+
+    // ── Delete conversation ────────────────────────────────────────────────
+    function deleteConv(convId) {
+      if (!confirm('Delete this conversation?')) return;
+      const account = getCurrentAccount();
+      deleteConversation(convId, account.id);
+      activeConvId = null;
+      stopListening();
+      document.getElementById('threadHead').innerHTML = '';
+      document.getElementById('threadMsgs').innerHTML = `
+        <div class="thread-empty"><div class="thread-empty-icon">✉️</div>
+        <h3>Your messages</h3><p>Select a conversation or start a new one.</p></div>`;
+      document.getElementById('composeWrap').style.display = 'none';
+      document.getElementById('msgThread').classList.remove('open');
+      renderConvList();
+      showToast('Conversation deleted');
+    }
+    window.deleteConv = deleteConv;
+
+    // ── New Conversation Modal ─────────────────────────────────────────────
+    window.openNewConvModal = () => {
+      ncGroupMembers = [];
+      document.getElementById('ncModal').classList.remove('hidden');
+      document.getElementById('ncSearchInput').value = '';
+      document.getElementById('ncSearchResults').innerHTML = '<p class="nc-hint">Type to search all users</p>';
+      switchNcTab('dm');
+      renderAthleteQuickList();
+      setTimeout(() => document.getElementById('ncSearchInput').focus(), 80);
+    };
+    window.closeNewConvModal = () => document.getElementById('ncModal').classList.add('hidden');
+
+    window.switchNcTab = (tab) => {
+      document.querySelectorAll('.nc-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.nc-section').forEach(s => s.classList.remove('active'));
+      document.getElementById('ncTab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+      document.getElementById('nc' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+    };
+
+    function renderAthleteQuickList() {
+      const section = document.getElementById('ncScoutQuick');
+      const listEl  = document.getElementById('ncAthleteList');
+      if (!canUserScout()) { section.style.display = 'none'; return; }
+      section.style.display = '';
+
+      const account = getCurrentAccount();
+      const athletes = getAccounts().filter(a => a.id !== account.id && a.accountType === 'athlete').slice(0, 8);
+      if (!athletes.length) { section.style.display = 'none'; return; }
+
+      listEl.innerHTML = athletes.map(a => {
+        const profiles = getAthletes().filter(p => p.accountId === a.id);
+        const sport    = profiles.length ? getSportName(profiles[0].sport) : '';
+        return `
+          <div class="nc-user-row" onclick="startDM('${a.id}')">
+            <div class="nc-avatar">${a.name[0].toUpperCase()}</div>
+            <div><div class="nc-name">${escapeHtml(a.name)}</div>
+                 <div class="nc-sub">Athlete${sport ? ' · ' + sport : ''}</div></div>
+            <span class="nc-action">💬</span>
+          </div>`;
+      }).join('');
+    }
+
+    window.ncSearch = (q) => {
+      const el = document.getElementById('ncSearchResults');
+      if (!q || q.length < 2) { el.innerHTML = '<p class="nc-hint">Type to search all users</p>'; return; }
+      const account = getCurrentAccount();
+      const f = q.toLowerCase();
+      const results = getAccounts().filter(a =>
+        a.id !== account.id &&
+        (a.name?.toLowerCase().includes(f) || a.email?.toLowerCase().includes(f))
+      ).slice(0, 10);
+
+      if (!results.length) { el.innerHTML = '<p class="nc-hint">No users found</p>'; return; }
+      el.innerHTML = results.map(a => `
+        <div class="nc-user-row" onclick="startDM('${a.id}')">
+          <div class="nc-avatar">${(a.name || 'U')[0].toUpperCase()}</div>
+          <div><div class="nc-name">${escapeHtml(a.name)}</div>
+               <div class="nc-sub">${ACCOUNT_TYPES[a.accountType]?.name || a.accountType}</div></div>
+          <span class="nc-action">→</span>
+        </div>`).join('');
+    };
+
+    window.startDM = (accountId) => {
+      closeNewConvModal();
+      const account = getCurrentAccount();
+      const conv    = createConversation(account.id, accountId);
+      openConv(conv.id);
+    };
+
+    // ── Group creation ─────────────────────────────────────────────────────
+    window.ncGroupSearch = (q) => {
+      const el = document.getElementById('ncGroupResults');
+      if (!q || q.length < 2) { el.innerHTML = ''; return; }
+      const account = getCurrentAccount();
+      const f = q.toLowerCase();
+      const results = getAccounts().filter(a =>
+        a.id !== account.id && !ncGroupMembers.includes(a.id) &&
+        (a.name?.toLowerCase().includes(f) || a.email?.toLowerCase().includes(f))
+      ).slice(0, 8);
+      el.innerHTML = results.map(a => `
+        <div class="nc-user-row" onclick="ncAddMember('${a.id}')">
+          <div class="nc-avatar">${(a.name || 'U')[0].toUpperCase()}</div>
+          <div><div class="nc-name">${escapeHtml(a.name)}</div>
+               <div class="nc-sub">${ACCOUNT_TYPES[a.accountType]?.name || a.accountType}</div></div>
+          <span class="nc-action">+</span>
+        </div>`).join('');
+    };
+
+    window.ncAddMember = (id) => {
+      if (!ncGroupMembers.includes(id)) ncGroupMembers.push(id);
+      renderMemberChips();
+      document.getElementById('ncGroupSearch').value = '';
+      document.getElementById('ncGroupResults').innerHTML = '';
+    };
+
+    function renderMemberChips() {
+      const el = document.getElementById('ncMemberChips');
+      if (!ncGroupMembers.length) {
+        el.innerHTML = '<span style="color:var(--text-muted);font-size:0.8rem;">No members yet</span>';
+        return;
+      }
+      el.innerHTML = ncGroupMembers.map(id => {
+        const a = getAccountById(id);
+        return `<div class="member-chip">${escapeHtml(a?.name || 'User')}<button onclick="ncRemoveMember('${id}')">×</button></div>`;
+      }).join('');
+    }
+
+    window.ncRemoveMember = (id) => {
+      ncGroupMembers = ncGroupMembers.filter(x => x !== id);
+      renderMemberChips();
+    };
+
+    window.createGroupConv = () => {
+      const name = document.getElementById('ncGroupName').value.trim();
+      if (!name) { showToast('Please enter a group name', 'error'); return; }
+      if (ncGroupMembers.length < 2) { showToast('Add at least 2 members', 'error'); return; }
+      const account = getCurrentAccount();
+      const conv    = createGroupConversation([account.id, ...ncGroupMembers], name);
+      closeNewConvModal();
+      openConv(conv.id);
+    };
+  </script>
 </body>
 </html>

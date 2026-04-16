@@ -910,6 +910,103 @@ h4 { font-size: 1.15rem; font-weight: 600; }
   border-color: transparent;
 }
 
+/* ---- Athlete Card Wrapper + Quick Message Button ---- */
+
+.athlete-card-wrap {
+  position: relative;
+}
+
+.athlete-card-wrap .athlete-card {
+  display: block;
+  height: 100%;
+}
+
+.card-msg-btn {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 22px;
+  padding: 0.45rem 1.1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+  z-index: 10;
+}
+
+.athlete-card-wrap:hover .card-msg-btn {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.card-msg-btn:hover {
+  background: var(--primary-dark, #1a3a6b);
+}
+
+/* ---- Message Template Row ---- */
+
+.template-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 0 0.6rem;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 0.6rem;
+}
+
+.template-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+}
+
+.tpl-btn {
+  background: transparent;
+  border: 1px solid var(--border-medium, rgba(255,255,255,0.15));
+  border-radius: 16px;
+  color: var(--text-secondary);
+  padding: 0.28rem 0.75rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.tpl-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(59,130,246,0.06);
+}
+
+/* ---- Recruiter badge on conversation items ---- */
+
+.recruiter-badge {
+  background: rgba(168,85,247,0.18) !important;
+  color: #c084fc !important;
+  border-color: rgba(168,85,247,0.3) !important;
+}
+
+/* ---- View Profile link in thread header ---- */
+
+.view-profile-link {
+  font-size: 0.76rem !important;
+  padding: 0.28rem 0.65rem !important;
+}
+
 /* Profile Page */
 .profile-hero {
   background: linear-gradient(135deg, var(--primary-navy) 0%, var(--primary-dark) 100%);

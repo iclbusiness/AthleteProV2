@@ -1,5 +1,13 @@
 // AthleteHub - Core Application JavaScript
 
+// Inject Firebase auth-sync module on every page (fixes login/signup button visibility)
+(function () {
+  const s = document.createElement('script');
+  s.type = 'module';
+  s.src = 'auth-sync.js';
+  document.head.appendChild(s);
+})();
+
 // ==================== DATA CONFIGURATION ====================
 
 const SPORTS_CONFIG = {
@@ -1025,7 +1033,8 @@ function loginAccount(email, password) {
     return { error: 'No account found with this email' };
   }
 
-  if (account.password !== hashPassword(password)) {
+  // Firebase-managed accounts skip local password check (auth handled by Firebase)
+  if (account.password !== 'firebase_managed' && account.password !== hashPassword(password)) {
     return { error: 'Incorrect password' };
   }
 
@@ -2339,36 +2348,46 @@ function renderAthleteCard(athlete) {
   const topStats = getTopStats(athlete);
   const todayAward = hasWonAwardToday(athlete.id);
   const awardCount = getAthleteAwardCount(athlete.id);
+  const currentAccount = getCurrentAccount();
+  const isOwnProfile = currentAccount && athlete.accountId === currentAccount.id;
+  const canMessage = currentAccount && athlete.accountId && !isOwnProfile;
 
   return `
-    <a href="profile.html?id=${athlete.id}" class="athlete-card ${todayAward ? 'potd-winner-card' : ''}">
-      <div class="athlete-card-header">
-        ${todayAward ? '<div class="card-potd-badge">🏆 Player of the Day</div>' : ''}
-        ${athlete.photo
-          ? `<img src="${athlete.photo}" alt="${athlete.name}" class="athlete-photo">`
-          : `<div class="athlete-photo-placeholder">👤</div>`
-        }
-      </div>
-      <div class="athlete-card-body">
-        <h3 class="athlete-name">
-          ${escapeHtml(athlete.name)}
-          ${awardCount > 0 ? `<span class="award-count-mini" title="${awardCount} award${awardCount > 1 ? 's' : ''}">🏆${awardCount}</span>` : ''}
-        </h3>
-        <div class="athlete-sport">${sportName} • ${athlete.position || 'Position TBD'}</div>
-        <div class="athlete-meta">
-          <span class="athlete-meta-item">📅 Class of ${athlete.gradYear || 'TBD'}</span>
-          ${athlete.city || athlete.state
-            ? `<span class="athlete-meta-item">📍 ${[athlete.city, athlete.state].filter(Boolean).join(', ')}</span>`
-            : ''
+    <div class="athlete-card-wrap">
+      <a href="profile.html?id=${athlete.id}" class="athlete-card ${todayAward ? 'potd-winner-card' : ''}">
+        <div class="athlete-card-header">
+          ${todayAward ? '<div class="card-potd-badge">🏆 Player of the Day</div>' : ''}
+          ${athlete.photo
+            ? `<img src="${athlete.photo}" alt="${athlete.name}" class="athlete-photo">`
+            : `<div class="athlete-photo-placeholder">👤</div>`
           }
         </div>
-        ${topStats.length > 0 ? `
-          <div class="athlete-stats-preview">
-            ${topStats.map(stat => `<span class="stat-badge">${stat}</span>`).join('')}
+        <div class="athlete-card-body">
+          <h3 class="athlete-name">
+            ${escapeHtml(athlete.name)}
+            ${awardCount > 0 ? `<span class="award-count-mini" title="${awardCount} award${awardCount > 1 ? 's' : ''}">🏆${awardCount}</span>` : ''}
+          </h3>
+          <div class="athlete-sport">${sportName} • ${athlete.position || 'Position TBD'}</div>
+          <div class="athlete-meta">
+            <span class="athlete-meta-item">📅 Class of ${athlete.gradYear || 'TBD'}</span>
+            ${athlete.city || athlete.state
+              ? `<span class="athlete-meta-item">📍 ${[athlete.city, athlete.state].filter(Boolean).join(', ')}</span>`
+              : ''
+            }
           </div>
-        ` : ''}
-      </div>
-    </a>
+          ${topStats.length > 0 ? `
+            <div class="athlete-stats-preview">
+              ${topStats.map(stat => `<span class="stat-badge">${stat}</span>`).join('')}
+            </div>
+          ` : ''}
+        </div>
+      </a>
+      ${canMessage ? `
+        <button class="card-msg-btn" data-account-id="${athlete.accountId}" onclick="event.preventDefault();quickMessageAthlete(this.dataset.accountId)">
+          💬 Message
+        </button>
+      ` : ''}
+    </div>
   `;
 }
 
@@ -4216,6 +4235,17 @@ function messageAthlete(accountId) {
   startNewConversation(accountId);
 }
 
+function quickMessageAthlete(accountId) {
+  if (!isLoggedIn()) {
+    window.location.href = 'login.html';
+    return;
+  }
+  const account = getCurrentAccount();
+  const conversation = createConversation(account.id, accountId);
+  // Add &intro=1 so the messages page can pre-show scout templates
+  window.location.href = `messages.html?conv=${conversation.id}&intro=1`;
+}
+
 function toggleWatchlistFromProfile(athleteId) {
   const account = getCurrentAccount();
   if (!account) {
@@ -4859,6 +4889,36 @@ function initMessagesPage() {
 
   renderConversationsList();
   setupMessageSearch();
+
+  // Auto-resize textarea as user types
+  const textarea = document.getElementById('messageInput');
+  if (textarea) {
+    textarea.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+    });
+  }
+}
+
+function useTemplate(type) {
+  const textarea = document.getElementById('messageInput');
+  if (!textarea) return;
+  const account = getCurrentAccount();
+  const name = account ? account.name : 'Coach';
+
+  const templates = {
+    scout_intro:    `Hi! My name is ${name} and I came across your profile — your stats and highlights really caught my attention. I'd love to tell you more about our program and discuss whether it could be a great fit for you. When would you have a few minutes to connect?`,
+    scout_interest: `I've been reviewing your profile and I'm genuinely impressed by what I see. You have exactly the kind of athleticism and work ethic we look for. Are you currently exploring college options? I'd love to start a conversation about what we can offer.`,
+    scout_visit:    `We'd love to have you visit our campus! It's a great opportunity to see our facilities, meet the coaching staff, and get a feel for our program. Would you be available for an official or unofficial visit? Please send me a few dates that work for you.`,
+    ath_thanks:     `Thank you so much for reaching out! I really appreciate your interest — it means a lot. I'm excited to learn more about your program and what opportunities might be available.`,
+    ath_interested: `I'm very interested in your program! I'd love to schedule a call so we can talk more. What times work best for you? I'm flexible and happy to make it work.`,
+    ath_info:       `I'd be happy to share more about myself! I have my full stats, highlight videos, and academic info on my AthletePro profile. Please take a look and let me know if you have any questions or want to set up a call.`,
+  };
+
+  textarea.value = templates[type] || '';
+  textarea.style.height = 'auto';
+  textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+  textarea.focus();
 }
 
 function renderConversationsList() {
@@ -4904,8 +4964,11 @@ function renderConversationsList() {
           }
         </div>`;
       displayName = escapeHtml(otherAccount?.name || 'Unknown User');
+      const isScoutContact = otherAccount && ['scout', 'coach'].includes(otherAccount.accountType);
+      const myAccountType = account.accountType;
+      const scoutReachOut = isScoutContact && myAccountType === 'athlete';
       badgeHtml = otherAccount
-        ? `<span class="conversation-type-badge">${ACCOUNT_TYPES[otherAccount.accountType]?.name || otherAccount.accountType}</span>`
+        ? `<span class="conversation-type-badge${scoutReachOut ? ' recruiter-badge' : ''}">${scoutReachOut ? '🔵 ' : ''}${ACCOUNT_TYPES[otherAccount.accountType]?.name || otherAccount.accountType}</span>`
         : '';
     }
 
@@ -4988,6 +5051,42 @@ function renderMessageThread(conversationId) {
     headerSubHtml = `<span class="thread-type">${ACCOUNT_TYPES[otherAccount?.accountType]?.name || ''}</span>`;
   }
 
+  // View Profile link — find athlete profile for the other user
+  let viewProfileHtml = '';
+  let templateHtml = '';
+  if (!conversation.isGroup) {
+    const otherUserId2 = conversation.participants.find(p => p !== account.id);
+    const otherAcc2 = getAccountById(otherUserId2);
+    const otherAthletes = getAthletes().filter(a => a.accountId === otherUserId2);
+    if (otherAthletes.length > 0) {
+      viewProfileHtml = `<a href="profile.html?id=${otherAthletes[0].id}" class="btn btn-sm btn-outline view-profile-link">View Profile</a>`;
+    }
+
+    // Template buttons based on who is talking to whom
+    const iAmScout = canUserScout();
+    const otherIsAthlete = otherAcc2?.accountType === 'athlete';
+    const iAmAthlete = account.accountType === 'athlete';
+    const otherIsScout = otherAcc2 && ['scout', 'coach'].includes(otherAcc2.accountType);
+
+    if (iAmScout && otherIsAthlete) {
+      templateHtml = `
+        <div class="template-row">
+          <span class="template-label">Quick:</span>
+          <button class="tpl-btn" onclick="useTemplate('scout_intro')">👋 Intro</button>
+          <button class="tpl-btn" onclick="useTemplate('scout_interest')">⭐ Interest</button>
+          <button class="tpl-btn" onclick="useTemplate('scout_visit')">📅 Visit</button>
+        </div>`;
+    } else if (iAmAthlete && otherIsScout) {
+      templateHtml = `
+        <div class="template-row">
+          <span class="template-label">Quick reply:</span>
+          <button class="tpl-btn" onclick="useTemplate('ath_thanks')">🙏 Thanks</button>
+          <button class="tpl-btn" onclick="useTemplate('ath_interested')">✅ Interested</button>
+          <button class="tpl-btn" onclick="useTemplate('ath_info')">📄 My Stats</button>
+        </div>`;
+    }
+  }
+
   threadHeader.innerHTML = `
     <div class="thread-user-info">
       <button class="back-btn mobile-only" onclick="closeConversation()">←</button>
@@ -4998,6 +5097,7 @@ function renderMessageThread(conversationId) {
       </div>
     </div>
     <div class="thread-actions">
+      ${viewProfileHtml}
       <button class="btn btn-sm btn-secondary" onclick="deleteConversationHandler('${conversationId}')">Delete</button>
     </div>
   `;
@@ -5026,7 +5126,15 @@ function renderMessageThread(conversationId) {
     threadContainer.scrollTop = threadContainer.scrollHeight;
   }
 
-  document.getElementById('composeArea').classList.remove('hidden');
+  const composeArea = document.getElementById('composeArea');
+  composeArea.classList.remove('hidden');
+
+  // Inject or update template row
+  const existingTplRow = composeArea.querySelector('.template-row');
+  if (existingTplRow) existingTplRow.remove();
+  if (templateHtml) {
+    composeArea.insertAdjacentHTML('afterbegin', templateHtml);
+  }
 }
 
 function closeConversation() {
@@ -5152,10 +5260,50 @@ function showNewConversationModal() {
     renderSelectedMembers();
     switchConversationTab('dm');
     document.getElementById('userSearchInput')?.focus();
-    if (document.getElementById('userSearchResults')) {
-      document.getElementById('userSearchResults').innerHTML = '';
+
+    const resultsEl = document.getElementById('userSearchResults');
+    if (resultsEl) {
+      // Scouts: pre-populate with athlete accounts as suggestions
+      if (canUserScout()) {
+        showAthleteSuggestions(resultsEl);
+      } else {
+        resultsEl.innerHTML = '<p class="search-hint">Type at least 2 characters to search</p>';
+      }
     }
   }
+}
+
+function showAthleteSuggestions(container) {
+  const account = getCurrentAccount();
+  const athletes = getAccounts().filter(a =>
+    a.id !== account.id && a.accountType === 'athlete'
+  ).slice(0, 8);
+
+  if (athletes.length === 0) {
+    container.innerHTML = '<p class="search-hint">No athlete accounts yet</p>';
+    return;
+  }
+
+  container.innerHTML = `
+    <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;padding:0 0.25rem;">Athletes you can recruit</p>
+    ${athletes.map(acc => {
+      const profiles = getAthletes().filter(a => a.accountId === acc.id);
+      const sport = profiles.length > 0 ? getSportName(profiles[0].sport) : '';
+      const position = profiles.length > 0 ? (profiles[0].position || '') : '';
+      return `
+        <div class="user-search-result" onclick="startConversationWith('${acc.id}')">
+          <div class="user-result-avatar">
+            <div class="avatar-placeholder">${acc.name?.charAt(0).toUpperCase() || 'A'}</div>
+          </div>
+          <div class="user-result-info">
+            <span class="user-result-name">${escapeHtml(acc.name || 'Athlete')}</span>
+            <span class="user-result-type" style="color:var(--primary);">Athlete${sport ? ' · ' + sport : ''}${position ? ' · ' + position : ''}</span>
+          </div>
+          <span style="color:var(--primary);font-size:1rem;margin-left:auto;">💬</span>
+        </div>
+      `;
+    }).join('')}
+  `;
 }
 
 function hideNewConversationModal() {
@@ -5343,13 +5491,189 @@ function startConversationWith(accountId) {
   startNewConversation(accountId);
 }
 
-// Stub functions for edit modals (to be expanded)
+// ==================== EDIT CLUB MODAL ====================
+
 function showEditClubModal() {
-  showToast('Edit club feature coming soon!');
+  const club = getClubById(currentClubId);
+  if (!club) return;
+
+  // Build modal HTML dynamically and inject into body
+  let modal = document.getElementById('editClubModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'editClubModal';
+    modal.className = 'modal-overlay';
+    document.body.appendChild(modal);
+  }
+
+  const sportOptions = Object.entries(SPORTS_CONFIG).map(([key, sport]) =>
+    `<option value="${key}" ${club.sport === key ? 'selected' : ''}>${sport.icon} ${sport.name}</option>`
+  ).join('');
+
+  modal.innerHTML = `
+    <div class="modal-content modal-medium">
+      <div class="modal-header">
+        <h2>Edit Club</h2>
+        <button class="modal-close" onclick="hideEditClubModal()">&times;</button>
+      </div>
+      <form onsubmit="handleEditClub(event)">
+        <div class="form-group">
+          <label for="editClubName">Club Name *</label>
+          <input type="text" id="editClubName" required value="${escapeHtml(club.name || '')}">
+        </div>
+        <div class="form-group">
+          <label for="editClubSport">Sport *</label>
+          <select id="editClubSport" required>
+            <option value="">Select Sport</option>
+            ${sportOptions}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="editClubDescription">Description</label>
+          <textarea id="editClubDescription" rows="3">${escapeHtml(club.description || '')}</textarea>
+        </div>
+        <div class="form-group">
+          <label for="editClubLocation">Location</label>
+          <input type="text" id="editClubLocation" value="${escapeHtml(club.location || '')}" placeholder="e.g., Los Angeles, CA">
+        </div>
+        <div class="form-group checkbox-group-inline">
+          <label>
+            <input type="checkbox" id="editClubRequireApproval" ${club.requireApproval ? 'checked' : ''}>
+            Require approval to join
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="hideEditClubModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  `;
+  modal.classList.remove('hidden');
 }
 
+function hideEditClubModal() {
+  const modal = document.getElementById('editClubModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function handleEditClub(e) {
+  e.preventDefault();
+  const account = getCurrentAccount();
+  if (!account || !canManageClub(account.id, currentClubId)) {
+    showToast('You do not have permission to edit this club', 'error');
+    return;
+  }
+
+  const name = document.getElementById('editClubName')?.value?.trim();
+  const sport = document.getElementById('editClubSport')?.value;
+  const description = document.getElementById('editClubDescription')?.value?.trim();
+  const location = document.getElementById('editClubLocation')?.value?.trim();
+  const requireApproval = document.getElementById('editClubRequireApproval')?.checked;
+
+  if (!name || !sport) {
+    showToast('Please fill in required fields', 'error');
+    return;
+  }
+
+  updateClub(currentClubId, { name, sport, description, location, requireApproval });
+  showToast('Club updated!');
+  hideEditClubModal();
+  initClubViewPage();
+}
+
+// ==================== EDIT EVENT MODAL ====================
+
 function showEditEventModal(eventId) {
-  showToast('Edit event feature coming soon!');
+  const event = getClubEventById(eventId);
+  if (!event) return;
+
+  let modal = document.getElementById('editEventModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'editEventModal';
+    modal.className = 'modal-overlay';
+    document.body.appendChild(modal);
+  }
+
+  modal.innerHTML = `
+    <div class="modal-content modal-medium">
+      <div class="modal-header">
+        <h2>Edit Event</h2>
+        <button class="modal-close" onclick="hideEditEventModal()">&times;</button>
+      </div>
+      <form onsubmit="handleEditEvent(event, '${eventId}')">
+        <div class="form-group">
+          <label for="editEventTitle">Event Title *</label>
+          <input type="text" id="editEventTitle" required value="${escapeHtml(event.title || '')}">
+        </div>
+        <div class="form-group">
+          <label for="editEventType">Event Type *</label>
+          <select id="editEventType" required>
+            <option value="training" ${event.type === 'training' ? 'selected' : ''}>Training Session</option>
+            <option value="game" ${event.type === 'game' ? 'selected' : ''}>Game / Match</option>
+            <option value="meeting" ${event.type === 'meeting' ? 'selected' : ''}>Team Meeting</option>
+            <option value="tryout" ${event.type === 'tryout' ? 'selected' : ''}>Tryouts</option>
+            <option value="other" ${event.type === 'other' ? 'selected' : ''}>Other</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editEventStartDate">Start Date & Time *</label>
+            <input type="datetime-local" id="editEventStartDate" required value="${event.startDate || ''}">
+          </div>
+          <div class="form-group">
+            <label for="editEventEndDate">End Date & Time</label>
+            <input type="datetime-local" id="editEventEndDate" value="${event.endDate || ''}">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="editEventLocation">Location</label>
+          <input type="text" id="editEventLocation" value="${escapeHtml(event.location || '')}" placeholder="e.g., Main Stadium">
+        </div>
+        <div class="form-group">
+          <label for="editEventDescription">Description</label>
+          <textarea id="editEventDescription" rows="3">${escapeHtml(event.description || '')}</textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="hideEditEventModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  `;
+  modal.classList.remove('hidden');
+}
+
+function hideEditEventModal() {
+  const modal = document.getElementById('editEventModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function handleEditEvent(e, eventId) {
+  e.preventDefault();
+  const account = getCurrentAccount();
+  if (!account || !canManageClub(account.id, currentClubId)) {
+    showToast('You do not have permission to edit this event', 'error');
+    return;
+  }
+
+  const title = document.getElementById('editEventTitle')?.value?.trim();
+  const type = document.getElementById('editEventType')?.value;
+  const startDate = document.getElementById('editEventStartDate')?.value;
+  const endDate = document.getElementById('editEventEndDate')?.value;
+  const location = document.getElementById('editEventLocation')?.value?.trim();
+  const description = document.getElementById('editEventDescription')?.value?.trim();
+
+  if (!title || !type || !startDate) {
+    showToast('Please fill in required fields', 'error');
+    return;
+  }
+
+  updateClubEvent(eventId, { title, type, startDate, endDate: endDate || null, location, description });
+  showToast('Event updated!');
+  hideEditEventModal();
+  initClubViewPage();
 }
 
 // ==================== SCOUT/COACH DASHBOARD PAGE ====================
@@ -7139,7 +7463,15 @@ function showCreatePlanModal() {
 
 function hideCreatePlanModal() {
   const modal = document.getElementById('createPlanModal');
-  if (modal) modal.classList.add('hidden');
+  if (!modal) return;
+  modal.classList.add('hidden');
+  // Reset to create mode in case it was used for editing
+  const form = modal.querySelector('form');
+  if (form) delete form.dataset.editPlanId;
+  const titleEl = modal.querySelector('.modal-header h2');
+  if (titleEl) titleEl.textContent = 'Create Training Plan';
+  const submitBtn = modal.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.textContent = 'Create Plan';
 }
 
 let exerciseCount = 0;
@@ -7202,16 +7534,24 @@ function handleCreatePlan(e) {
     return;
   }
 
-  createTrainingPlan({
-    title,
-    sport,
-    difficulty,
-    description,
-    isPublic,
-    exercises
-  });
+  // Check if we're editing an existing plan
+  const form = e.target;
+  const editPlanId = form.dataset.editPlanId;
 
-  showToast('Training plan created!');
+  if (editPlanId) {
+    updateTrainingPlan(editPlanId, { title, sport, difficulty, description, isPublic, exercises });
+    showToast('Training plan updated!');
+    // Reset form to create mode
+    delete form.dataset.editPlanId;
+    const titleEl = document.querySelector('#createPlanModal .modal-header h2');
+    if (titleEl) titleEl.textContent = 'Create Training Plan';
+    const submitBtn = document.querySelector('#createPlanModal button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = 'Create Plan';
+  } else {
+    createTrainingPlan({ title, sport, difficulty, description, isPublic, exercises });
+    showToast('Training plan created!');
+  }
+
   hideCreatePlanModal();
   initTrainingPage();
 }
@@ -7291,8 +7631,68 @@ function deleteTrainingPlanHandler(planId) {
 }
 
 function editTrainingPlan(planId) {
-  // For simplicity, show the plan and allow editing through the modal
-  showToast('Edit feature coming soon!');
+  const plan = getTrainingPlanById(planId);
+  if (!plan) return;
+
+  // Re-use createPlanModal, pre-populated with plan data
+  const modal = document.getElementById('createPlanModal');
+  if (!modal) return;
+
+  // Update modal title and button
+  const titleEl = modal.querySelector('.modal-header h2');
+  if (titleEl) titleEl.textContent = 'Edit Training Plan';
+  const submitBtn = modal.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.textContent = 'Save Changes';
+
+  // Store the plan id being edited on the form
+  const form = modal.querySelector('form');
+  if (form) form.dataset.editPlanId = planId;
+
+  // Populate sport select
+  const sportSelect = document.getElementById('planSport');
+  if (sportSelect) {
+    sportSelect.innerHTML = '<option value="">Select Sport</option>' +
+      Object.entries(SPORTS_CONFIG).map(([key, sport]) =>
+        `<option value="${key}" ${plan.sport === key ? 'selected' : ''}>${sport.icon} ${sport.name}</option>`
+      ).join('');
+  }
+
+  // Populate basic fields
+  const titleInput = document.getElementById('planTitle');
+  if (titleInput) titleInput.value = plan.title || '';
+  const difficultySelect = document.getElementById('planDifficulty');
+  if (difficultySelect) difficultySelect.value = plan.difficulty || 'beginner';
+  const descriptionInput = document.getElementById('planDescription');
+  if (descriptionInput) descriptionInput.value = plan.description || '';
+  const isPublicCheck = document.getElementById('planIsPublic');
+  if (isPublicCheck) isPublicCheck.checked = plan.isPublic !== false;
+
+  // Populate exercises
+  const exercisesList = document.getElementById('exercisesList');
+  if (exercisesList) {
+    exercisesList.innerHTML = '';
+    exerciseCount = 0;
+    (plan.exercises || []).forEach(ex => {
+      exerciseCount++;
+      const id = exerciseCount;
+      exercisesList.insertAdjacentHTML('beforeend', `
+        <div class="exercise-item" id="exercise-${id}">
+          <div class="exercise-header">
+            <span>Exercise ${id}</span>
+            <button type="button" class="btn btn-sm btn-outline" onclick="removeExercise(${id})">Remove</button>
+          </div>
+          <div class="exercise-fields">
+            <input type="text" placeholder="Exercise name" class="exercise-name" value="${escapeHtml(ex.name || '')}">
+            <input type="text" placeholder="Sets x Reps (e.g., 3x10)" class="exercise-reps" value="${escapeHtml(ex.reps || '')}">
+            <input type="text" placeholder="Duration (e.g., 30 seconds)" class="exercise-duration" value="${escapeHtml(ex.duration || '')}">
+            <textarea placeholder="Instructions/Notes" class="exercise-notes">${escapeHtml(ex.notes || '')}</textarea>
+          </div>
+        </div>
+      `);
+    });
+  }
+
+  modal.classList.remove('hidden');
 }
 
 // ==================== INITIALIZATION ====================
@@ -7375,6 +7775,10 @@ window.toggleReelComments = toggleReelComments;
 window.handleReelComment = handleReelComment;
 window.navigateReel = navigateReel;
 
+// Messaging
+window.quickMessageAthlete = quickMessageAthlete;
+window.useTemplate = useTemplate;
+
 // Admin
 window.isAdmin = isAdmin;
 window.getAccounts = getAccounts;
@@ -7438,7 +7842,11 @@ window.handleToggleAttendance = handleToggleAttendance;
 window.handleJoinClub = handleJoinClub;
 window.handleLeaveClub = handleLeaveClub;
 window.showEditClubModal = showEditClubModal;
+window.hideEditClubModal = hideEditClubModal;
+window.handleEditClub = handleEditClub;
 window.showEditEventModal = showEditEventModal;
+window.hideEditEventModal = hideEditEventModal;
+window.handleEditEvent = handleEditEvent;
 
 // Training features
 window.showCreatePlanModal = showCreatePlanModal;

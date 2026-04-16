@@ -146,6 +146,15 @@
         </div>
       </div>
 
+      <!-- Recruiter Messages -->
+      <div class="portal-section" id="recruiterMessagesSection" style="display:none;">
+        <div class="portal-section-header">
+          <h2>&#128172; Recruiter Messages</h2>
+          <a href="messages.html" class="btn btn-secondary btn-sm">View All</a>
+        </div>
+        <div id="recruiterMessagesList"></div>
+      </div>
+
       <!-- Quick Actions -->
       <div class="portal-section">
         <div class="portal-section-header">
@@ -340,6 +349,63 @@
           .replace(/"/g, '&quot;');
       }
 
+      // ---- Recruiter Messages ----
+      function renderRecruiterMessages() {
+        try {
+          const conversations = JSON.parse(localStorage.getItem('athletehub_conversations') || '[]');
+          const messages = JSON.parse(localStorage.getItem('athletehub_messages') || '[]');
+          const accounts = JSON.parse(localStorage.getItem('athletehub_accounts') || '[]');
+
+          // Find conversations where the other party is a scout/coach
+          const recruiterConvs = conversations.filter(function(conv) {
+            if (!conv.participants || !conv.participants.includes(account.id)) return false;
+            var otherId = conv.participants.find(function(p) { return p !== account.id; });
+            if (!otherId) return false;
+            var otherAcc = accounts.find(function(a) { return a.id === otherId; });
+            return otherAcc && (otherAcc.accountType === 'scout' || otherAcc.accountType === 'coach');
+          });
+
+          if (recruiterConvs.length === 0) return;
+
+          var section = document.getElementById('recruiterMessagesSection');
+          var list = document.getElementById('recruiterMessagesList');
+          if (!section || !list) return;
+
+          section.style.display = '';
+
+          var html = recruiterConvs.slice(0, 5).map(function(conv) {
+            var otherId = conv.participants.find(function(p) { return p !== account.id; });
+            var otherAcc = accounts.find(function(a) { return a.id === otherId; }) || {};
+            var convMsgs = messages.filter(function(m) { return m.conversationId === conv.id; });
+            var lastMsg = convMsgs[convMsgs.length - 1];
+            var unreadCount = convMsgs.filter(function(m) { return !m.read && m.senderId !== account.id; }).length;
+            var initials = (otherAcc.name || 'R').charAt(0).toUpperCase();
+            var timeStr = lastMsg ? new Date(lastMsg.createdAt).toLocaleDateString(undefined, {month:'short', day:'numeric'}) : '';
+            return '<a href="messages.html?conv=' + conv.id + '" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;border-radius:8px;text-decoration:none;color:inherit;transition:background 0.15s;">' +
+              '<div style="width:40px;height:40px;border-radius:50%;background:var(--primary,#6366f1);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;flex-shrink:0;">' +
+                (otherAcc.photo ? '<img src="' + otherAcc.photo + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" alt="">' : initials) +
+              '</div>' +
+              '<div style="flex:1;min-width:0;">' +
+                '<div style="display:flex;justify-content:space-between;align-items:baseline;">' +
+                  '<span style="font-weight:600;font-size:0.9rem;">' + escHtml(otherAcc.name || 'Recruiter') + '</span>' +
+                  '<span style="font-size:0.75rem;color:var(--text-secondary);">' + timeStr + '</span>' +
+                '</div>' +
+                '<div style="font-size:0.82rem;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' +
+                  (lastMsg ? escHtml(lastMsg.content.substring(0, 60) + (lastMsg.content.length > 60 ? '…' : '')) : 'No messages yet') +
+                '</div>' +
+              '</div>' +
+              (unreadCount > 0 ? '<span style="background:var(--primary,#6366f1);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0;">' + unreadCount + '</span>' : '') +
+              '</a>';
+          }).join('');
+
+          if (recruiterConvs.length > 5) {
+            html += '<div style="text-align:center;margin-top:0.5rem;"><a href="messages.html" class="btn btn-secondary btn-sm">View All ' + recruiterConvs.length + ' Conversations</a></div>';
+          }
+
+          list.innerHTML = html;
+        } catch (e) {}
+      }
+
       // ---- Load Data ----
       function init() {
         // Load profiles (try common localStorage keys)
@@ -363,6 +429,7 @@
         renderCompletion(checks);
         renderStatsSummary(profiles);
         renderCollegeInterest(recruiting);
+        renderRecruiterMessages();
 
         // Video count from profiles
         if (profiles.length > 0) {
