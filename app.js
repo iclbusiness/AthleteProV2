@@ -1112,6 +1112,11 @@ function getProfilesByAccount(accountId) {
   return athletes.filter(a => a.accountId === accountId);
 }
 
+function getAthleteByAccountId(accountId) {
+  const athletes = getAthletes();
+  return athletes.find(a => a.accountId === accountId) || null;
+}
+
 function saveAthlete(athlete) {
   const athletes = getAthletes();
   const index = athletes.findIndex(a => a.id === athlete.id);
@@ -3696,10 +3701,39 @@ function switchFeedTab(tab) {
 
 function initIndexPage() {
   renderSportsGrid();
-  renderAthleteGrid();
   setupSearchFilters();
   populateFilterOptions();
   renderPOTDSection();
+
+  // Pre-apply URL query params (e.g. from scout-portal talent search)
+  const urlParams = new URLSearchParams(window.location.search);
+  const sportParam = urlParams.get('sport');
+  const yearParam = urlParams.get('year');
+  const stateParam = urlParams.get('state');
+  const nameParam = urlParams.get('name');
+
+  if (sportParam || yearParam || stateParam || nameParam) {
+    // Wait for populateFilterOptions to finish then set values
+    requestAnimationFrame(() => {
+      if (sportParam) {
+        const sf = document.getElementById('sportFilter');
+        if (sf) { sf.value = sportParam; sf.dispatchEvent(new Event('change')); }
+      }
+      if (yearParam) {
+        const yf = document.getElementById('yearFilter');
+        if (yf) { yf.value = yearParam; yf.dispatchEvent(new Event('change')); }
+      }
+      if (nameParam) {
+        const si = document.getElementById('searchInput');
+        if (si) { si.value = nameParam; si.dispatchEvent(new Event('input')); }
+      }
+      // Scroll to browse section if any filter was set
+      const browseSection = document.getElementById('browse');
+      if (browseSection) browseSection.scrollIntoView({ behavior: 'smooth' });
+    });
+  } else {
+    renderAthleteGrid();
+  }
 }
 
 // Render all 38 sports in a scrollable grid
@@ -5967,10 +6001,17 @@ function viewAthleteFromDashboard(athleteId) {
 
 function messageAthleteFromDashboard(athleteId) {
   const athlete = getAthleteById(athleteId);
-  if (athlete && athlete.accountId) {
-    startNewConversation(athlete.accountId);
+  if (!athlete) { showToast('Athlete not found', 'error'); return; }
+  const accountId = athlete.accountId || athlete.userId;
+  if (accountId) {
+    startNewConversation(accountId);
   } else {
-    showToast('Unable to message this athlete', 'error');
+    // Fall back to quick-message helper which also handles the navigation
+    if (typeof quickMessageAthlete === 'function') {
+      quickMessageAthlete(athlete.id);
+    } else {
+      showToast('Unable to message this athlete', 'error');
+    }
   }
 }
 
