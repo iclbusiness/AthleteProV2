@@ -3841,6 +3841,13 @@ let profileData = {
 };
 
 function initCreatePage() {
+  // Role guard: only athletes (and admins) can create athlete profiles
+  if (isLoggedIn() && !canUserCreateProfiles()) {
+    showToast('Only athletes can create recruiting profiles', 'error');
+    setTimeout(() => window.location.href = 'scout-portal.html', 1500);
+    return;
+  }
+
   // Check if editing existing profile
   const urlParams = new URLSearchParams(window.location.search);
   const editId = urlParams.get('edit');
@@ -4672,6 +4679,30 @@ function updateAuthUI() {
 
   // Render floating admin view switcher bar
   renderAdminViewBar();
+
+  // ---- Role-based nav visibility ----
+  // Hide portal links that don't belong to this account type.
+  // Admins bypass all restrictions (they use the view switcher).
+  const _acct = getCurrentAccount();
+  const _type = _acct ? _acct.accountType : null;
+  const _admin = isAdmin();
+
+  // "Player Portal" links → only for athletes (+ admin)
+  document.querySelectorAll('a[href="player-portal.html"]').forEach(el => {
+    el.style.display = (!_acct || _admin || _type === 'athlete') ? '' : 'none';
+  });
+  // "Scout Portal" / "My Prospects" links → only for scouts/coaches (+ admin)
+  document.querySelectorAll('a[href="scout-portal.html"], a[href="prospects.html"]').forEach(el => {
+    el.style.display = (!_acct || _admin || _type === 'scout' || _type === 'coach') ? '' : 'none';
+  });
+  // "Create Profile" links → only for athletes (+ admin)
+  document.querySelectorAll('a[href="create.html"], a[href^="create.html?"]').forEach(el => {
+    el.style.display = (!_acct || _admin || _type === 'athlete') ? '' : 'none';
+  });
+  // "College Interest" / offers links → only for athletes (+ admin)
+  document.querySelectorAll('a[href="offers.html"]').forEach(el => {
+    el.style.display = (!_acct || _admin || _type === 'athlete') ? '' : 'none';
+  });
 }
 
 function toggleUserMenu() {
