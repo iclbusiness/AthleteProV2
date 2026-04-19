@@ -6286,7 +6286,8 @@ function showCreateEventModal() {
     modal.classList.remove('hidden');
     // Set default date to today
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('eventDate').value = today;
+    const dateEl = document.getElementById('eventDate');
+    if (dateEl) dateEl.value = today;
   }
 }
 
@@ -6295,7 +6296,8 @@ function hideCreateEventModal() {
   if (modal) modal.classList.add('hidden');
 }
 
-function handleCreateEvent(e) {
+// Scout dashboard event creation (separate from club-view's handleCreateEvent)
+function handleCreateScoutEvent(e) {
   e.preventDefault();
 
   const title = document.getElementById('eventTitle')?.value?.trim();
@@ -6322,9 +6324,9 @@ function handleCreateEvent(e) {
   hideCreateEventModal();
 
   // Clear form
-  document.getElementById('eventTitle').value = '';
-  document.getElementById('eventLocation').value = '';
-  document.getElementById('eventDescription').value = '';
+  if (document.getElementById('eventTitle')) document.getElementById('eventTitle').value = '';
+  if (document.getElementById('eventLocation')) document.getElementById('eventLocation').value = '';
+  if (document.getElementById('eventDescription')) document.getElementById('eventDescription').value = '';
 
   // Refresh calendar and events
   renderCalendar();
@@ -6478,6 +6480,8 @@ function renderSquadGroups() {
   if (!account) return;
 
   const squad = getSquad(account.id);
+  // All roster athletes available to add to groups
+  const rosterAthletes = squad.members.map(id => getAthleteById(id)).filter(Boolean);
 
   container.innerHTML = `
     <div class="squad-groups-header">
@@ -6485,26 +6489,46 @@ function renderSquadGroups() {
     </div>
     ${squad.groups.length === 0 ? `
       <div class="empty-groups">
-        <p>No groups created yet. Create groups to organize your squad by position, skill level, or custom categories.</p>
+        <p>No groups yet. Create groups to organize your roster by position, skill level, or any custom category.</p>
+        ${rosterAthletes.length === 0 ? '<p style="font-size:0.85rem;color:var(--text-muted);margin-top:0.5rem;">Add athletes to your squad first, then organize them into groups.</p>' : ''}
       </div>
     ` : `
       <div class="squad-groups-list">
         ${squad.groups.map(group => {
           const groupMembers = group.members.map(id => getAthleteById(id)).filter(Boolean);
+          // Athletes in squad but not yet in this group
+          const available = rosterAthletes.filter(a => !group.members.includes(a.id));
           return `
             <div class="squad-group-card" style="border-left: 4px solid ${group.color || '#3b82f6'}">
               <div class="squad-group-header">
-                <h4>${escapeHtml(group.name)}</h4>
-                <span class="group-count">${groupMembers.length} members</span>
+                <div style="display:flex;align-items:center;gap:0.75rem;flex:1;min-width:0;">
+                  <span style="width:12px;height:12px;border-radius:50%;background:${group.color || '#3b82f6'};flex-shrink:0;"></span>
+                  <h4 style="margin:0;">${escapeHtml(group.name)}</h4>
+                  <span class="group-count">${groupMembers.length} member${groupMembers.length !== 1 ? 's' : ''}</span>
+                </div>
                 <button class="btn btn-sm btn-outline" onclick="deleteGroupHandler('${group.id}')">Delete</button>
               </div>
               ${group.description ? `<p class="group-description">${escapeHtml(group.description)}</p>` : ''}
               <div class="group-members-preview">
-                ${groupMembers.slice(0, 5).map(a => `
-                  <span class="group-member-chip">${escapeHtml(a.name)}</span>
-                `).join('')}
+                ${groupMembers.length === 0
+                  ? '<span style="color:var(--text-muted);font-size:0.82rem;">No members yet</span>'
+                  : groupMembers.map(a => `
+                    <span class="group-member-chip">
+                      ${escapeHtml(a.name)}
+                      <button onclick="removeAthleteFromGroupHandler('${group.id}','${a.id}')" style="background:none;border:none;cursor:pointer;color:inherit;opacity:0.6;padding:0 0 0 4px;font-size:0.8rem;" title="Remove">&times;</button>
+                    </span>
+                  `).join('')}
                 ${groupMembers.length > 5 ? `<span class="more-members">+${groupMembers.length - 5} more</span>` : ''}
               </div>
+              ${available.length > 0 ? `
+                <div style="margin-top:0.6rem;display:flex;gap:0.5rem;align-items:center;">
+                  <select id="addMemberSelect_${group.id}" class="form-control" style="flex:1;font-size:0.82rem;padding:0.3rem 0.5rem;">
+                    <option value="">Add squad member...</option>
+                    ${available.map(a => `<option value="${escapeHtml(a.id)}">${escapeHtml(a.name)}${a.position ? ' — ' + escapeHtml(a.position) : ''}</option>`).join('')}
+                  </select>
+                  <button class="btn btn-sm btn-primary" onclick="addMemberToGroupHandler('${group.id}')">Add</button>
+                </div>
+              ` : `<p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.5rem;">${rosterAthletes.length === 0 ? 'Add athletes to your squad to assign them to groups.' : 'All squad members are in this group.'}</p>`}
             </div>
           `;
         }).join('')}
@@ -6614,7 +6638,7 @@ function filterSquadAthletes() {
   if (athletes.length === 0) {
     container.innerHTML = searchQuery
       ? '<div class="no-results">No athletes found matching your search</div>'
-      : '<div class="no-results">Start typing to search for athletes</div>';
+      : '<div class="no-results">No athletes available to add</div>';
     return;
   }
 
@@ -6700,6 +6724,22 @@ function deleteGroupHandler(groupId) {
     showToast('Group deleted');
     renderSquadGroups();
   }
+}
+
+function addMemberToGroupHandler(groupId) {
+  const selectEl = document.getElementById(`addMemberSelect_${groupId}`);
+  const athleteId = selectEl?.value;
+  if (!athleteId) { showToast('Select an athlete first', 'error'); return; }
+  const account = getCurrentAccount();
+  addAthleteToGroup(account.id, groupId, athleteId);
+  showToast('Added to group!');
+  renderSquadGroups();
+}
+
+function removeAthleteFromGroupHandler(groupId, athleteId) {
+  const account = getCurrentAccount();
+  removeAthleteFromGroup(account.id, groupId, athleteId);
+  renderSquadGroups();
 }
 
 function updateSquadNoteHandler(athleteId, note) {
@@ -7900,6 +7940,29 @@ window.updateWatchlistNotesHandler = updateWatchlistNotesHandler;
 window.filterScoutAthletes = filterScoutAthletes;
 window.viewAthleteFromDashboard = viewAthleteFromDashboard;
 window.messageAthleteFromDashboard = messageAthleteFromDashboard;
+
+// Scout dashboard — calendar
+window.showCreateEventModal = showCreateEventModal;
+window.hideCreateEventModal = hideCreateEventModal;
+window.handleCreateScoutEvent = handleCreateScoutEvent;
+window.deleteCoachEventHandler = deleteCoachEventHandler;
+window.changeCalendarMonth = changeCalendarMonth;
+window.showDayEvents = showDayEvents;
+
+// Scout dashboard — squad management
+window.showAddToSquadModal = showAddToSquadModal;
+window.hideAddToSquadModal = hideAddToSquadModal;
+window.filterSquadAthletes = filterSquadAthletes;
+window.addToSquadHandler = addToSquadHandler;
+window.removeFromSquadHandler = removeFromSquadHandler;
+window.showCreateGroupModal = showCreateGroupModal;
+window.hideCreateGroupModal = hideCreateGroupModal;
+window.handleCreateGroup = handleCreateGroup;
+window.deleteGroupHandler = deleteGroupHandler;
+window.addMemberToGroupHandler = addMemberToGroupHandler;
+window.removeAthleteFromGroupHandler = removeAthleteFromGroupHandler;
+window.updateSquadNoteHandler = updateSquadNoteHandler;
+window.switchSquadTab = switchSquadTab;
 
 // Club features
 window.showCreateClubModal = showCreateClubModal;
